@@ -1,0 +1,33 @@
+Diagnosis
+---------
+The crash is not primarily caused by the Genesis header checksum or by the SMBT/SMRT torch sprites.
+The ROM's embedded 32X IWAD directory contains non-word-aligned lump pointers starting after BOSSBACK.
+
+Critical examples from original blaze.32x:
+  M_DOOM    ptr 0x1e45ef  mod4=3
+  COLORMAP  ptr 0x1e5983  mod4=3
+  PLAYPALS  ptr 0x1e9983  mod4=3
+  MAP01     ptr 0x22982a  mod4=2
+  THINGS    ptr 0x229833  mod4=3
+  LINEDEFS  ptr 0x229a8f  mod4=3
+  SIDEDEFS  ptr 0x22a333  mod4=3
+
+Stock dooma.32x has all embedded IWAD lump pointers 4-byte aligned.
+The misalignment begins because BOSSBACK is 17827 bytes long and the importer wrote M_DOOM immediately after it without padding.
+That shifted M_DOOM/COLORMAP/PLAYPALS and later map lumps onto odd addresses.
+
+Kega Fusion tolerates this. PicoDrive and real 32X hardware are stricter about SH2/68k word/long accesses, so odd-address asset reads produce broken graphics and MAP01 can hang/crash.
+
+Fix
+---
+blaze_aligned.32x rebuilds only the embedded IWAD data area:
+  * preserves the original lump data bytes and lump sizes;
+  * inserts 0xFF padding so every nonzero lump pointer is 4-byte aligned;
+  * moves the IWAD directory from 0x2386ac to 0x2386b8;
+  * repairs the ROM checksum.
+
+Validation performed
+--------------------
+  * Exporting blaze_aligned.32x through wad32x_fixed reproduces the same WAD data as the earlier fixed export.
+  * PicoDrive reaches MAP01 from reset with blaze_aligned.32x.
+  * The original blaze.32x produces the black viewport/hang at the same point in PicoDrive.
