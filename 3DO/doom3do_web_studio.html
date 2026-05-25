@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Doom 3DO Web Studio v29 BIN export</title>
+<title>Doom 3DO Web Studio v51 Freedoom SFX resample</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 :root{--bg:#101114;--panel:#171a20;--panel2:#20242c;--fg:#e7eaf0;--muted:#a5adbb;--line:#343b49;--accent:#79b8ff;--warn:#ffcc66;--bad:#ff7373;--ok:#7ee787}
@@ -19,13 +19,14 @@ label{color:var(--muted);font-size:12px}input,select,button,textarea{color:var(-
 </style>
 </head>
 <body>
-<header><h1>Doom 3DO Web Studio v29 BIN export</h1><div class="sub">Single-file HTML/JavaScript prototype with proper 32X map/flat/texture decoding, compressed map import and ROM extraction, recursive multi-block Music/Sounds subfolder editing, persistent map-editor deletions, append-capable ISO export for oversized rebuilt REZFILEs, PWAD graphics-only import, pure-JS MD5 3DO signing, fixed ROM-tag banner replacement, default signing, stock revert buttons, WAD/IWAD processing, full REZ rebuild, and sprite CEL repacking for ISO, REZ, WAD, maps, SDX2 music, AIFF SFX, banner, LaunchMe executable replacement, and root-file and BIN/CUE export workflows.</div></header>
+<header><h1>Doom 3DO Web Studio v51 Freedoom SFX resample</h1><div class="sub">Single-file HTML/JavaScript prototype with proper 32X map/flat/texture decoding, compressed map import and ROM extraction, recursive multi-block Music/Sounds subfolder editing, persistent map-editor deletions, append-capable ISO export for oversized rebuilt REZFILEs, PWAD graphics-only import, pure-JS MD5 3DO signing, fixed ROM-tag banner replacement, default signing, stock revert buttons, WAD/IWAD processing, full REZ rebuild, and sprite CEL repacking for ISO, REZ, WAD, maps, SDX2 music, AIFF SFX, banner, LaunchMe executable replacement, and root-file, BIN/CUE export workflows, Freedoom IWAD bulk import for graphics/maps/SFX, and category-selectable PWAD/IWAD imports, configurable Freedoom ROCKS flat selection, and 3DO-tuned WAD sprite offset import for first-person psprites, with corrected 3DO psprite stock-center anchoring, source-code Doom/SLADE psprite projection vertically scaled into the 3DO 160-line weapon view and converted to the 3DO DrawAWeapon coordinate system, with muzzle flashes anchored to the active weapon frame to avoid double-compressing the overlay delta, transparent multi-frame sprite/fixed-graphic PNG spritesheet export/import, 32X/ROM map light-level normalization for 3DO renderer-safe sector lighting, BLAZE FIX retroactive REZ-map light repair for maps imported before the lighting normalization change, forced 8 kHz mono AIFF conversion for WAD/Freedoom DS* sound effects, SPR_OURHEROBDY Freedoom corpse import, and Freedoom UI/fixed-graphic repairs for TITLEPIC→MAINDOOM, CHARSET uppercase capital-bank fill, and stock 3DO slider preservation.</div></header>
 <main>
 <aside>
 <div class="card"><label>3DO ISO / BIN / CUE</label><input id="isoInput" type="file" multiple><div class="small">For CUE/BIN select both files. In-place root replacement is supported when the replacement fits the existing allocation.</div></div>
-<div class="card"><label>PWAD / IWAD / 32X ROM</label><input id="wadInput" type="file" accept=".wad,.32x,.bin,*/*"><div class="row"><label><input id="wadImportGraphics" type="checkbox" checked> import/map-referenced graphics</label><button id="btnProcessWad" class="primary">Process WAD/IWAD</button></div><div class="small">Processes maps and, when checked, attempts to import referenced walls/flats into 3DO resource slots and remap names as needed.</div></div>
+<div class="card"><label>ISO content diff → project JSON</label><div class="row"><label>base</label><input id="diffBaseInput" type="file" multiple></div><div class="row"><label>modified</label><input id="diffModifiedInput" type="file" multiple></div><div class="row"><button id="btnIsoDiffProject" class="primary">Create diff project JSON</button></div><div id="isoDiffStatus" class="small">Select a base ISO/BIN/CUE and a modified ISO/BIN/CUE. The diff compares OperaFS file contents, REZ resources, and the fixed banner region; raw sector/signature-only changes are ignored.</div></div>
+<div class="card"><label>PWAD / IWAD / 32X ROM / Freedoom1.wad</label><input id="wadInput" type="file" accept=".wad,.32x,.bin,*/*"><div class="row"><label><input id="wadImportLevels" type="checkbox" checked> levels/maps</label><label><input id="wadImportGraphics" type="checkbox" checked> graphics/sprites/fixed</label><label><input id="wadImportSfx" type="checkbox" checked> sound effects</label><label><input id="wadImportMusic" type="checkbox"> music/MIDI report only</label></div><div class="row"><label>Freedoom ROCKS flat</label><select id="freedoomRocksMode"><option value="safe" selected>auto non-lava stone</option><option value="gray">gray stone priority</option><option value="brown">brown rock priority</option><option value="green">green/grass rock edge</option><option value="iwad">IWAD ROCKS lump first</option><option value="legacy">legacy RROCK order</option><option value="skip">do not replace ROCKS</option></select></div><div class="row"><label>Sprite offsets</label><select id="wadSpriteOffsetMode"><option value="wad" selected>SLADE/Chocolate psprite → 3DO scaled</option><option value="raw-wad">raw WAD patch headers</option><option value="auto">auto center/bottom world sprites</option><option value="preserve">preserve existing 3DO offsets</option></select></div><div class="row"><label>Map lighting</label><select id="wadMapLightMode"><option value="auto" selected>auto 32X/ROM → 3DO scaled</option><option value="literal">literal WAD values</option><option value="dark">darker 32X/ROM scale</option><option value="bright">bright 3DO scale</option></select></div><div class="row"><label><input id="freedoomUiFixes" type="checkbox" checked> Freedoom UI fixes</label></div><div class="row"><button id="btnProcessWad" class="primary">Process WAD/IWAD</button><button id="btnFreedoomIwad" class="primary">Apply Freedoom IWAD pack</button></div><div id="freedoomStatus" class="small">Load a WAD/IWAD here. Category checkboxes control both normal WAD processing and the Freedoom bulk importer. Music is detected/reported only; Doom MIDI/MUS conversion is not implemented. The ROCKS selector controls the 3DO ROCKS flat during Freedoom bulk import; default mode skips candidates that look like red/orange lava. Sprite offsets default to WAD patch offsets for world sprites and a source-code psprite projection for first-person weapons: Doom/SLADE patch origins are first converted to vanilla 320×200 screen top-left placement, vertically scaled to the 3DO 320×160 weapon view, then mapped into the 3DO DrawAWeapon input coordinate system; muzzle flashes are anchored to their active weapon frame so the flash delta is not compressed twice. This applies uniformly to fists, guns, shotguns, muzzle flashes, and other front-weapon frames. Map lighting defaults to converting 32X/embedded ROM sector light values into the 3DO renderer’s effective range so 255 no longer imports as fullbright/no-falloff; regular PC WAD lighting can be kept literal with the selector. Freedoom UI fixes map TITLEPIC to the fullscreen MAINDOOM resource, fill both CHARSET A-Z banks from uppercase STCFN letters, and hard-skip/revert the stock 3DO slider instead of importing Freedoom M_THERMO/M_THERMM.</div><div class="small">Default import applies maps, graphics, sprites/fixed graphics, and Doom-format DS* sound effects. DS* sound effects are decoded and resampled to 8000 Hz mono AIFF before being queued into the 3DO Sounds folder. Graphics replacement never creates new REZ resources in the Freedoom path; normal PWAD map import may remap unknown map textures into existing 3DO wall/flat slots. The sprite offset selector applies to normal WAD import and Freedoom bulk import; the default keeps Chocolate-style world sprite origins and projects first-person weapon origins through the same psprite screen placement used by Doom/SLADE, scales Doom’s 200-line psprite space into the 3DO 160-line weapon view, then converts them to the 3DO DrawAWeapon coordinate system. Flash overlays are then placed relative to the active weapon frame, matching the ps_flash attachment behavior in the engine. Imported 32X/ROM maps use the Map lighting selector; auto mode scales 0–255 32X light values into a 0–192-ish 3DO range and clamps away fullbright 255 so dark sectors remain dark.</div></div>
 <div class="card"><label>Project</label><div class="row"><button id="btnSaveProject">Save project JSON</button><input id="projectInput" type="file" accept=".json"></div></div>
-<div class="card"><label>Blaze Doom map fix</label><div class="row"><button id="btnBlazeFixAllMaps" class="primary">BLAZE FIX ALL MAPS</button></div><div id="blazeFixStatus" class="small">Not applied.</div><div class="small">Applies to every MAPxx in the current REZ: any sector flat slot using NUKAGE3→FLOOR6_2, NUKAGE2→GRASS, NUKAGE1→CEIL5_1.</div></div>
+<div class="card"><label>Blaze Doom map fix</label><div class="row"><button id="btnBlazeFixAllMaps" class="primary">BLAZE FIX ALL MAPS</button></div><div class="row"><label><input id="blazeFixLighting" type="checkbox" checked> also repair old 32X sector lighting</label></div><div id="blazeFixStatus" class="small">Not applied.</div><div class="small">Applies to every MAPxx in the current REZ: any sector flat slot using NUKAGE3→FLOOR6_2, NUKAGE2→GRASS, NUKAGE1→CEIL5_1. When enabled, it also retroactively normalizes suspicious fullbright 32X/ROM sector light values in existing REZ SECTORS lumps, using the Map lighting mode above, so maps imported/exported before v49 can be fixed without re-importing the ROM.</div></div>
 <div class="card"><label>Sprite offset tools</label><div class="row"><button id="btnAutoFixSpriteOffsets" class="primary">AUTO-FIX MODIFIED SPRITE OFFSETS</button></div><div id="spriteOffsetFixStatus" class="small">Not applied.</div><div class="small">For modified world sprites, sets each patch origin from its displayed dimensions: left≈width/2 and top=height, so floor-anchored actors/decorations are horizontally centered and bottom-aligned.</div></div>
 <div class="card"><label>REZ / wall diagnostics</label><div class="row"><button id="btnAuditRez" class="primary">AUDIT / FIX WALL GUARDS</button></div><div id="rezAuditStatus" class="small">Not run.</div><div class="small">Checks wall resources against the 3DO renderer-safe byte count. Repaired wall replacements get the same repeated guard tail used by original 128×128 wall resources.</div></div>
 <div class="card"><label>Export</label><div class="row"><button id="btnExportIso" class="primary">Export patched image</button><button id="btnDownloadRez">Download REZFILE</button><label>format</label><select id="exportFormat"><option value="iso">ISO 2048/user-data</option><option value="bin2352">BIN/CUE MODE1/2352</option></select><label><input id="signIso" type="checkbox" checked> apply 3DOEncrypt signing</label></div><div class="small warn">Full REZ rebuild is implemented for changed REZ payloads. PNG/raw replacement is supported for sprites, walls, flats, and fixed/misc CCB graphics; map edits can apply THINGS/LINEDEFS/VERTEXES back to REZ. 3DOEncrypt-style signing is applied before final ISO/BIN export. BIN export emits a matching CUE file and wraps the signed 2048-byte image as MODE1/2352 sectors.</div></div>
@@ -36,7 +37,7 @@ label{color:var(--muted);font-size:12px}input,select,button,textarea{color:var(-
 <div class="tabs"><div class="tab active" data-tab="assets">Assets</div><div class="tab" data-tab="maps">Map viewer/editor</div><div class="tab" data-tab="music">Music</div><div class="tab" data-tab="sfx">Sound effects</div><div class="tab" data-tab="banner">Banner</div><div class="tab" data-tab="launchme">LaunchMe</div><div class="tab" data-tab="operafs">OperaFS</div><div class="tab" data-tab="export">Export report</div></div>
 <div id="tab_assets">
 <div class="card"><div class="row"><label>Filter</label><select id="assetFilter"><option value="all">all</option><option value="sprite">sprites</option><option value="misc">fixed graphics</option><option value="wall">walls</option><option value="flat">flats</option><option value="map">maps</option><option value="music">music/root</option><option value="sfx">sfx/root</option></select><input id="assetSearch" placeholder="search"><button id="btnRefreshAssets">Refresh</button></div><div class="row"><button id="btnAssetBatchMode">Multi-select revert: off</button><button id="btnRevertBatch" class="warn">Revert selected assets to stock</button><button id="btnClearBatch">Clear selection</button><span id="batchInfo" class="small">0 selected</span></div><div class="small">Modified assets have a yellow contour. Enable multi-select to choose several assets, then revert them to stock at once.</div></div>
-<div class="preview"><div id="assetGrid" class="grid"></div><div class="card"><h3 id="previewTitle">Preview</h3><canvas id="previewCanvas" width="320" height="240"></canvas><div id="previewInfo" class="small"></div><div id="assetAudioControls" class="hidden"><hr><audio id="assetAudioPlayer" controls style="width:100%"></audio><div class="small">Selected audio can be played, downloaded, replaced, or reverted here. Replacement keeps the exact OperaFS path.</div></div><div id="mapControls" class="hidden"><hr><button id="btnEditSelectedMap" class="primary">Edit in Map editor</button><button id="btnRevertSelectedMap" class="warn">Revert map to stock</button></div><div id="spriteControls" class="hidden"><hr><label>Sprite frame / rotation</label><select id="spriteFrameSelect"></select><div class="row"><label>left offset</label><input id="spriteLeftOffset" type="number" step="1" style="width:86px"><label>top offset</label><input id="spriteTopOffset" type="number" step="1" style="width:86px"><button id="btnApplySpriteOffsets" class="primary">Apply sprite offsets</button></div><div class="small">Offsets are the 3DO/Doom patch origin. World sprites use floor-origin placement; first-person weapon sprites use screen-space psprite placement. PNG replacement preserves these offsets.</div><div class="row"><canvas id="spriteEngineCanvas" width="320" height="200" title="Approximate Doom engine placement preview"></canvas></div><div id="spriteEngineInfo" class="small">Engine placement preview.</div></div><div id="miscControls" class="hidden"><hr><label>Fixed graphic shape</label><select id="miscShapeSelect"></select></div><hr><div class="row"><button id="btnDownloadPng">Download PNG</button><button id="btnDownloadRaw">Download raw</button><button id="btnRevertSelected" class="warn">Revert selected to stock</button></div><div class="row"><label>Replace selected asset/audio</label><input id="assetReplaceInput" type="file"></div></div></div>
+<div class="preview"><div id="assetGrid" class="grid"></div><div class="card"><h3 id="previewTitle">Preview</h3><canvas id="previewCanvas" width="320" height="240"></canvas><div id="previewInfo" class="small"></div><div id="assetAudioControls" class="hidden"><hr><audio id="assetAudioPlayer" controls style="width:100%"></audio><div class="small">Selected audio can be played, downloaded, replaced, or reverted here. Replacement keeps the exact OperaFS path.</div></div><div id="mapControls" class="hidden"><hr><button id="btnEditSelectedMap" class="primary">Edit in Map editor</button><button id="btnRevertSelectedMap" class="warn">Revert map to stock</button></div><div id="spriteControls" class="hidden"><hr><label>Sprite frame / rotation</label><select id="spriteFrameSelect"></select><div class="row"><label>left offset</label><input id="spriteLeftOffset" type="number" step="1" style="width:86px"><label>top offset</label><input id="spriteTopOffset" type="number" step="1" style="width:86px"><button id="btnApplySpriteOffsets" class="primary">Apply sprite offsets</button></div><div class="small">Offsets are the 3DO/Doom patch origin. World sprites use floor-origin placement; first-person weapon sprites use screen-space psprite placement. PNG replacement preserves these offsets. Multi-frame sprite/fixed resources export as transparent PNG spritesheets with embedded frame metadata, and those sheets can be imported back to the same resource.</div><div class="row"><canvas id="spriteEngineCanvas" width="320" height="200" title="Approximate Doom engine placement preview"></canvas></div><div id="spriteEngineInfo" class="small">Engine placement preview.</div></div><div id="miscControls" class="hidden"><hr><label>Fixed graphic shape</label><select id="miscShapeSelect"></select></div><hr><div class="row"><button id="btnDownloadPng">Download PNG</button><button id="btnDownloadRaw">Download raw</button><button id="btnRevertSelected" class="warn">Revert selected to stock</button></div><div class="row"><label>Replace selected asset/audio</label><input id="assetReplaceInput" type="file"></div></div></div>
 </div>
 <div id="tab_maps" class="hidden">
 <div class="card"><div class="row"><label>Map</label><select id="mapSelect"></select><button id="btnLoadMap">Load map</button><button id="btnDeleteLine" class="bad">Delete selected linedef</button><button id="btnExportMapWad">Download edited MAP WAD</button><button id="btnRevertMapStock" class="warn">Revert map to stock</button></div><div class="small">Click a wall to select it. Deleting a linedef now autosaves the edited map back into the internal rebuilt REZFILE. Use the left-side BLAZE FIX ALL MAPS button for Blaze Doom flat remapping.</div></div>
@@ -68,6 +69,7 @@ label{color:var(--muted);font-size:12px}input,select,button,textarea{color:var(-
 </section>
 </main>
 <script>
+
 'use strict';
 const CONSTS={"WALL_NAMES":["BIGDOOR2","BIGDOOR6","BRNPOIS","BROWNGRN","BROWN1","COMPSPAN","COMPTALL","CRATE1","CRATELIT","CRATINY","DOOR1","DOOR3","DOORBLU","DOORRED","DOORSTOP","DOORTRAK","DOORYEL","EXITDOOR","EXITSIGN","GRAY5","GSTSATYR","LITE5","MARBFAC3","METAL","METAL1","NUKE24","PIPE2","PLAT1","SHAWN2","SKINEDGE","SKY1","SKY2","SKY3","SLADWALL","SP_DUDE4","SP_HOT1","STEP6","SUPPORT2","SUPPORT3","SW1BRN1","SW1GARG","SW1GSTON","SW1HOT","SW1WOOD","SW2BRN1","SW2GARG","SW2GSTON","SW2HOT","SW2WOOD","BRICK01","BRICK02","BRICK03","DFACE01","MARBLE01","MARBLE02","MARBLE03","MARBLE04","WOOD01","ASH01","CEMENT01","CBLUE01","TECH01","TECH02","TECH03","TECH04","SKIN01","SKIN02","SKIN03","SKULLS01","STWAR01","STWAR02","COMTAL02","SW1STAR","SW2STAR"],"FLAT_NAMES":["FLAT14","FLAT23","FLAT5_2","FLAT5_4","NUKAGE1","NUKAGE2","NUKAGE3","FLOOR0_1","FLOOR0_3","FLOOR0_6","FLOOR3_3","FLOOR4_6","FLOOR4_8","FLOOR5_4","STEP1","STEP2","FLOOR6_1","FLOOR6_2","TLITE6_4","TLITE6_6","FLOOR7_1","FLOOR7_2","MFLR8_1","MFLR8_4","CEIL3_2","CEIL3_4","CEIL5_1","CRATOP1","CRATOP2","FLAT4","FLAT8","GATE3","GATE4","FWATER1","FWATER2","FWATER3","FWATER4","LAVA1","LAVA2","LAVA3","LAVA4","GRASS","ROCKS"],"MISC_NAMES":["BACKGROUNDMASK_0","BACKGROUNDMASK_1","BACKGROUNDMASK_2","BACKGROUNDMASK_3","BACKGROUNDMASK_4","BACKGROUNDMASK_5","TITLE","IDCREDITS","CREDITS","LOGCREDITS","BACKGRND","BACKGRNDBROWN","CHARSET","PAUSED","LOADING","BIGNUMB","INTERMIS","STBAR","SBARSHP","FACES","SKULLS","MAINDOOM","MAINMENU","SLIDER","DEMO1","DEMO2"],"SPRITE_NAMES":["BIGFISTS","BIGPISTOL","BIGSHOTGUN","BIGCHAINGUN","BIGROCKET","BIGPLASMA","BIGBFG","BIGCHAINSAW","ZOMBIE","ZOMBIEBODY","SHOTGUY","IMP","DEMON","CACODEMON","CACODIE","CACOBDY","CACOBOLT","LOSTSOUL","BARON","BARONATK","BARONDIE","BARONBDY","BARONBLT","OURHERO","OURHEROBDY","BARREL","IFOG","FIRECAN","POOLBLOOD","CANDLE","CANDLEABRA","SHOTGUN","CHAINGUN","ROCKETLAUNCHER","CHAINSAW","CLIP","SHELLS","ROCKET","STIMPACK","MEDIKIT","GREENARMOR","BLUEARMOR","LIGHTCOLUMN","BACKPACK","BOXROCKETS","BOXAMMO","BOXSHELLS","TECHPILLAR","BLUEKEYCARD","YELLOWKEYCARD","REDKEYCARD","RADIATIONSUIT","IRGOGGLES","COMPUTERMAP","INVISIBILITY","HEALTHBONUS","SOULSPHERE","ARMORBONUS","BODYPOLE","FIVESKULLPOLE","TALLSKULLPOLE","SHORTGREENPILLAR","SHORTREDPILLAR","FLAMINGSKULLS","MEDDEADTREE","LARGESTAL","SMALLSTAL","BLUESKULLKEY","REDSKULLKEY","YELLOWSKULLKEY","PLASMARIFLE","BFG9000","CELL","BERZERKER","CELLPACK","HANGINGRUMP","REDTORCH","BLUETORCH","GREENTORCH","INVULNERABILITY","TELEFOG","BFS1","BFE1","BFE2","PLSS","PLSE","MISL","BLUD","PUFF"],"MAP_LUMPS_REZ":["THINGS","LINEDEFS","SIDEDEFS","VERTEXES","SEGS","SSECTORS","SECTORS","NODES","REJECT","BLOCKMAP"]};
 const WALL_NAMES=CONSTS.WALL_NAMES,FLAT_NAMES=CONSTS.FLAT_NAMES,MISC_NAMES=CONSTS.MISC_NAMES,SPRITE_NAMES=CONSTS.SPRITE_NAMES,MAP_LUMPS_REZ=CONSTS.MAP_LUMPS_REZ;
@@ -97,7 +99,7 @@ Object.assign(WAD_SPRITE_IMPORT,{
   "HEADK0":[[399,3,null,false]],
   "HEADL0":[[399,4,null,false],[400,0,null,false]]
 });
-const WAD_MISC_IMPORT={"BGMASK0":[[119,0]],"BGMASK1":[[120,0]],"BGMASK2":[[121,0]],"BGMASK3":[[122,0]],"BGMASK4":[[123,0]],"BGMASK5":[[124,0]],"TITLEPIC":[[125,0]],"CREDIT":[[126,0]],"CREDITS":[[127,0]],"LOGCRED":[[128,0]],"BACKGRND":[[129,0]],"BCKGRNB":[[130,0]],"STCFN065":[[131,0]],"STCFN066":[[131,1]],"STCFN067":[[131,2]],"STCFN068":[[131,3]],"STCFN069":[[131,4]],"STCFN070":[[131,5]],"STCFN071":[[131,6]],"STCFN072":[[131,7]],"STCFN073":[[131,8]],"STCFN074":[[131,9]],"STCFN075":[[131,10]],"STCFN076":[[131,11]],"STCFN077":[[131,12]],"STCFN078":[[131,13]],"STCFN079":[[131,14]],"STCFN080":[[131,15]],"STCFN081":[[131,16]],"STCFN082":[[131,17]],"STCFN083":[[131,18]],"STCFN084":[[131,19]],"STCFN085":[[131,20]],"STCFN086":[[131,21]],"STCFN087":[[131,22]],"STCFN088":[[131,23]],"STCFN089":[[131,24]],"STCFN090":[[131,25]],"STCFN097":[[131,26]],"STCFN098":[[131,27]],"STCFN099":[[131,28]],"STCFN100":[[131,29]],"STCFN101":[[131,30]],"STCFN102":[[131,31]],"STCFN103":[[131,32]],"STCFN104":[[131,33]],"STCFN105":[[131,34]],"STCFN106":[[131,35]],"STCFN107":[[131,36]],"STCFN108":[[131,37]],"STCFN109":[[131,38]],"STCFN110":[[131,39]],"STCFN111":[[131,40]],"STCFN112":[[131,41]],"STCFN113":[[131,42]],"STCFN114":[[131,43]],"STCFN115":[[131,44]],"STCFN116":[[131,45]],"STCFN117":[[131,46]],"STCFN118":[[131,47]],"STCFN119":[[131,48]],"STCFN120":[[131,49]],"STCFN121":[[131,50]],"STCFN122":[[131,51]],"STCFN046":[[131,52]],"STCFN058":[[131,53]],"M_PAUSE":[[132,0]],"LOADING":[[133,0]],"STTNUM0":[[134,0]],"STTNUM1":[[134,1]],"STTNUM2":[[134,2]],"STTNUM3":[[134,3]],"STTNUM4":[[134,4]],"STTNUM5":[[134,5]],"STTNUM6":[[134,6]],"STTNUM7":[[134,7]],"STTNUM8":[[134,8]],"STTNUM9":[[134,9]],"STTPRCNT":[[134,10]],"STTMINUS":[[134,11]],"WIOSTK":[[135,0]],"WIOSTI":[[135,1]],"WISCRT2":[[135,2]],"STBAR":[[136,0]],"STKEYS0":[[137,0]],"STKEYS1":[[137,1]],"STKEYS2":[[137,2]],"STKEYS3":[[137,3]],"STKEYS4":[[137,4]],"STKEYS5":[[137,5]],"STYSNUM2":[[137,6]],"STYSNUM3":[[137,7]],"STYSNUM4":[[137,8]],"STYSNUM5":[[137,9]],"STYSNUM6":[[137,10]],"STYSNUM7":[[137,11]],"STFST00":[[138,0]],"STFST01":[[138,1]],"STFST02":[[138,2]],"STFTL00":[[138,3]],"STFTR00":[[138,4]],"STFOUCH0":[[138,5]],"STFEVL0":[[138,6]],"STFKILL0":[[138,7]],"STFST10":[[138,8]],"STFST11":[[138,9]],"STFST12":[[138,10]],"STFTL10":[[138,11]],"STFTR10":[[138,12]],"STFOUCH1":[[138,13]],"STFEVL1":[[138,14]],"STFKILL1":[[138,15]],"STFST20":[[138,16]],"STFST21":[[138,17]],"STFST22":[[138,18]],"STFTL20":[[138,19]],"STFTR20":[[138,20]],"STFOUCH2":[[138,21]],"STFEVL2":[[138,22]],"STFKILL2":[[138,23]],"STFST30":[[138,24]],"STFST31":[[138,25]],"STFST32":[[138,26]],"STFTL30":[[138,27]],"STFTR30":[[138,28]],"STFOUCH3":[[138,29]],"STFEVL3":[[138,30]],"STFKILL3":[[138,31]],"STFST40":[[138,32]],"STFST41":[[138,33]],"STFST42":[[138,34]],"STFTL40":[[138,35]],"STFTR40":[[138,36]],"STFOUCH4":[[138,37]],"STFEVL4":[[138,38]],"STFKILL4":[[138,39]],"STFGOD0":[[138,40]],"STFDEAD0":[[138,41]],"STFSPL0":[[138,42]],"STFSPL1":[[138,43]],"STFSPL2":[[138,44]],"STFSPL3":[[138,45]],"STFSPL4":[[138,46]],"STFSPL5":[[138,47]],"STFSPL6":[[138,48]],"STFSPL7":[[138,49]],"M_SKULL1":[[139,0]],"M_SKULL2":[[139,1]],"M_DOOM":[[140,0]],"M_JKILL":[[141,0]],"M_ROUGH":[[141,1]],"M_HURT":[[141,2]],"M_ULTRA":[[141,3]],"M_NMARE":[[141,4]],"M_EPISOD":[[141,5]],"M_SKILL":[[141,6]],"M_THERMO":[[142,0]],"M_THERMM":[[142,1]]};
+const WAD_MISC_IMPORT={"BGMASK0":[[119,0]],"BGMASK1":[[120,0]],"BGMASK2":[[121,0]],"BGMASK3":[[122,0]],"BGMASK4":[[123,0]],"BGMASK5":[[124,0]],"TITLEPIC":[[125,0],[140,0]],"CREDIT":[[126,0]],"CREDITS":[[127,0]],"LOGCRED":[[128,0]],"BACKGRND":[[129,0]],"BCKGRNB":[[130,0]],"STCFN065":[[131,0]],"STCFN066":[[131,1]],"STCFN067":[[131,2]],"STCFN068":[[131,3]],"STCFN069":[[131,4]],"STCFN070":[[131,5]],"STCFN071":[[131,6]],"STCFN072":[[131,7]],"STCFN073":[[131,8]],"STCFN074":[[131,9]],"STCFN075":[[131,10]],"STCFN076":[[131,11]],"STCFN077":[[131,12]],"STCFN078":[[131,13]],"STCFN079":[[131,14]],"STCFN080":[[131,15]],"STCFN081":[[131,16]],"STCFN082":[[131,17]],"STCFN083":[[131,18]],"STCFN084":[[131,19]],"STCFN085":[[131,20]],"STCFN086":[[131,21]],"STCFN087":[[131,22]],"STCFN088":[[131,23]],"STCFN089":[[131,24]],"STCFN090":[[131,25]],"STCFN097":[[131,26]],"STCFN098":[[131,27]],"STCFN099":[[131,28]],"STCFN100":[[131,29]],"STCFN101":[[131,30]],"STCFN102":[[131,31]],"STCFN103":[[131,32]],"STCFN104":[[131,33]],"STCFN105":[[131,34]],"STCFN106":[[131,35]],"STCFN107":[[131,36]],"STCFN108":[[131,37]],"STCFN109":[[131,38]],"STCFN110":[[131,39]],"STCFN111":[[131,40]],"STCFN112":[[131,41]],"STCFN113":[[131,42]],"STCFN114":[[131,43]],"STCFN115":[[131,44]],"STCFN116":[[131,45]],"STCFN117":[[131,46]],"STCFN118":[[131,47]],"STCFN119":[[131,48]],"STCFN120":[[131,49]],"STCFN121":[[131,50]],"STCFN122":[[131,51]],"STCFN046":[[131,52]],"STCFN058":[[131,53]],"M_PAUSE":[[132,0]],"LOADING":[[133,0]],"STTNUM0":[[134,0]],"STTNUM1":[[134,1]],"STTNUM2":[[134,2]],"STTNUM3":[[134,3]],"STTNUM4":[[134,4]],"STTNUM5":[[134,5]],"STTNUM6":[[134,6]],"STTNUM7":[[134,7]],"STTNUM8":[[134,8]],"STTNUM9":[[134,9]],"STTPRCNT":[[134,10]],"STTMINUS":[[134,11]],"WIOSTK":[[135,0]],"WIOSTI":[[135,1]],"WISCRT2":[[135,2]],"STBAR":[[136,0]],"STKEYS0":[[137,0]],"STKEYS1":[[137,1]],"STKEYS2":[[137,2]],"STKEYS3":[[137,3]],"STKEYS4":[[137,4]],"STKEYS5":[[137,5]],"STYSNUM2":[[137,6]],"STYSNUM3":[[137,7]],"STYSNUM4":[[137,8]],"STYSNUM5":[[137,9]],"STYSNUM6":[[137,10]],"STYSNUM7":[[137,11]],"STFST00":[[138,0]],"STFST01":[[138,1]],"STFST02":[[138,2]],"STFTL00":[[138,3]],"STFTR00":[[138,4]],"STFOUCH0":[[138,5]],"STFEVL0":[[138,6]],"STFKILL0":[[138,7]],"STFST10":[[138,8]],"STFST11":[[138,9]],"STFST12":[[138,10]],"STFTL10":[[138,11]],"STFTR10":[[138,12]],"STFOUCH1":[[138,13]],"STFEVL1":[[138,14]],"STFKILL1":[[138,15]],"STFST20":[[138,16]],"STFST21":[[138,17]],"STFST22":[[138,18]],"STFTL20":[[138,19]],"STFTR20":[[138,20]],"STFOUCH2":[[138,21]],"STFEVL2":[[138,22]],"STFKILL2":[[138,23]],"STFST30":[[138,24]],"STFST31":[[138,25]],"STFST32":[[138,26]],"STFTL30":[[138,27]],"STFTR30":[[138,28]],"STFOUCH3":[[138,29]],"STFEVL3":[[138,30]],"STFKILL3":[[138,31]],"STFST40":[[138,32]],"STFST41":[[138,33]],"STFST42":[[138,34]],"STFTL40":[[138,35]],"STFTR40":[[138,36]],"STFOUCH4":[[138,37]],"STFEVL4":[[138,38]],"STFKILL4":[[138,39]],"STFGOD0":[[138,40]],"STFDEAD0":[[138,41]],"STFSPL0":[[138,42]],"STFSPL1":[[138,43]],"STFSPL2":[[138,44]],"STFSPL3":[[138,45]],"STFSPL4":[[138,46]],"STFSPL5":[[138,47]],"STFSPL6":[[138,48]],"STFSPL7":[[138,49]],"M_SKULL1":[[139,0]],"M_SKULL2":[[139,1]],"M_JKILL":[[141,0]],"M_ROUGH":[[141,1]],"M_HURT":[[141,2]],"M_ULTRA":[[141,3]],"M_NMARE":[[141,4]],"M_EPISOD":[[141,5]],"M_SKILL":[[141,6]],"M_THERMO":[[142,0]],"M_THERMM":[[142,1]]};
 const state={isoName:null,iso:null,root:[],allFiles:[],rez:null,rezEntries:[],textureInfo:new Map(),assets:[],selectedAsset:null,wad:null,wadMaps:[],map:null,mapDeleted:new Set(),mapDeletedByMap:new Map(),replacements:new Map(),rezReplacements:new Map(),spritePatchReplacements:new Map(),audioQueue:[],rezGroups:[],selectedSpriteFrameIndex:0,selectedMiscShapeIndex:0,audioObjectUrl:null,bannerReplacement:null,batchMode:false,batchSelected:new Set(),spriteScaleWarnings:new Set(),operaFsCwd:'',selectedOperaPath:null,selectedOperaOrigPath:null,operaDeletes:new Set(),operaRenames:new Map(),operaNewFiles:new Map(),operaAddFilePending:null};
 function $(id){return document.getElementById(id)}function log(m){const e=$('log'),t=new Date().toLocaleTimeString();e.textContent+=`[${t}] ${m}\n`;e.scrollTop=e.scrollHeight;console.log(m)}function cleanName(s){return String(s||'').replace(/[^A-Za-z0-9_.-]+/g,'_')}function blob(b,t='application/octet-stream'){return new Blob([b instanceof Uint8Array?b:new Uint8Array(b)],{type:t})}function download(n,b){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}
 function u32be(d,o){return ((d[o]<<24)|(d[o+1]<<16)|(d[o+2]<<8)|d[o+3])>>>0}function s32be(d,o){const v=u32be(d,o);return v>0x7fffffff?v-0x100000000:v}function u16be(d,o){return(d[o]<<8)|d[o+1]}function s16be(d,o){const v=u16be(d,o);return v>0x7fff?v-0x10000:v}function u32le(d,o){return(d[o]|(d[o+1]<<8)|(d[o+2]<<16)|(d[o+3]<<24))>>>0}function u16le(d,o){return d[o]|(d[o+1]<<8)}function s16le(d,o){const v=u16le(d,o);return v>0x7fff?v-0x10000:v}function w32be(a,o,v){a[o]=(v>>>24)&255;a[o+1]=(v>>>16)&255;a[o+2]=(v>>>8)&255;a[o+3]=v&255}function w16be(a,o,v){a[o]=(v>>>8)&255;a[o+1]=v&255}function w32le(a,o,v){a[o]=v&255;a[o+1]=(v>>>8)&255;a[o+2]=(v>>>16)&255;a[o+3]=(v>>>24)&255}function w16le(a,o,v){a[o]=v&255;a[o+1]=(v>>>8)&255}function ascii(d,o,n){let s='';for(let i=0;i<n&&o+i<d.length;i++){if(d[o+i]===0)break;s+=String.fromCharCode(d[o+i])}return s}function name8(s){const out=new Uint8Array(8),t=String(s||'').toUpperCase();for(let i=0;i<Math.min(8,t.length);i++)out[i]=t.charCodeAt(i)&255;return out}
@@ -109,6 +111,224 @@ function looksOperaFsAt(d,o=0){return o>=0&&o+6<=d.length&&d[o]===1&&ascii(d,o+1
 function stripRaw2352Sectors(d,startSector,modeHint){const sectorSize=2352,userSize=2048,start=startSector*sectorSize;if(start<0||start+sectorSize>d.length)throw Error('CUE INDEX 01 points outside the selected BIN');const sectors=Math.floor((d.length-start)/sectorSize),out=new Uint8Array(sectors*userSize);for(let s=0;s<sectors;s++){const src=start+s*sectorSize,po=raw2352PayloadOffset(d,src,modeHint);if(po==null)throw Error(`BIN is not valid MODE1/2352 or MODE2/2352 at sector ${startSector+s}`);out.set(d.slice(src+po,src+po+userSize),s*userSize)}return out}
 function normalizeIsoBytes(d,name,cueInfo){if(looksOperaFsAt(d,0))return{bytes:d,report:'2048-byte ISO/OperaFS image'};const mode=cueInfo&&cueInfo.mode||'',indexSector=cueInfo&&cueInfo.indexSector||0,isRaw2352=(d.length%2352===0)||/\/2352/i.test(mode)||cueSectorSync(d,0);if(!isRaw2352)return{bytes:d,report:'unconverted image'};const candidates=[0];if(indexSector&&!candidates.includes(indexSector))candidates.push(indexSector);let lastErr=null;for(const s of candidates){try{const out=stripRaw2352Sectors(d,s,mode);if(looksOperaFsAt(out,0))return{bytes:out,report:`raw ${mode||'2352-byte'} BIN stripped to 2048-byte sectors${s?` from CUE INDEX 01 sector ${s}`:''}`};lastErr=Error(`2352-byte sector stripping at sector ${s} did not reveal an OperaFS superblock`)}catch(e){lastErr=e}}try{return{bytes:stripRaw2352Sectors(d,0,mode),report:`raw ${mode||'2352-byte'} BIN stripped to 2048-byte sectors; OperaFS validation deferred`}}catch(e){throw lastErr||e}}
 async function loadIso(files){const arr=[...files];let bin=arr.find(f=>/\.(iso|bin|img)$/i.test(f.name)),cue=arr.find(f=>/\.cue$/i.test(f.name)),cueInfo=null;if(cue){cueInfo=parseCue(await cue.text());const ref=cueInfo&&cueInfo.file;const hit=arr.find(f=>ref&&(f.name.toLowerCase()===ref.toLowerCase()||f.name.toLowerCase().endsWith(ref.toLowerCase())));if(hit)bin=hit}if(!bin)throw Error('No ISO/BIN/IMG file selected');state.isoName=bin.name;const raw=await fileBytes(bin),norm=normalizeIsoBytes(raw,bin.name,cueInfo);state.iso=norm.bytes;state.root=parseOperaRoot(state.iso);state.allFiles=parseOperaAllFiles(state.iso);showRoot();const rz=(state.allFiles||state.root).find(e=>!e.isDir&&e.path.toUpperCase()==='REZFILE');if(rz){parseRez(state.iso.slice(rz.firstCopyOffset,rz.firstCopyOffset+rz.byteCount));log(`Loaded ${bin.name} (${norm.report}); extracted REZFILE ${rz.byteCount} bytes`)}else log(`Loaded ${bin.name} (${norm.report}); REZFILE not found`);try{loadBannerFromIso(false)}catch(e){console.warn(e)}refreshAssets();renderAudioList();updateLaunchMeStatus();renderOperaFs()}
+
+async function readIsoFileGroupForDiff(files,label){
+  const arr=[...(files||[])];
+  if(!arr.length)throw Error(`${label}: select an ISO/BIN, or a CUE plus its BIN`);
+  let bin=arr.find(f=>/\.(iso|bin|img)$/i.test(f.name)),cue=arr.find(f=>/\.cue$/i.test(f.name)),cueInfo=null;
+  if(cue){
+    cueInfo=parseCue(await cue.text());
+    const ref=cueInfo&&cueInfo.file;
+    const hit=arr.find(f=>ref&&(f.name.toLowerCase()===ref.toLowerCase()||f.name.toLowerCase().endsWith(ref.toLowerCase())));
+    if(hit)bin=hit;
+  }
+  if(!bin)throw Error(`${label}: no ISO/BIN/IMG file selected`);
+  const raw=await fileBytes(bin),norm=normalizeIsoBytes(raw,bin.name,cueInfo),iso=norm.bytes,warnings=[];
+  const root=parseOperaRootForDiff(iso,warnings),allFiles=parseOperaAllFilesForDiff(iso,warnings);
+  return{name:bin.name,iso,report:norm.report,root,allFiles,parseWarnings:warnings};
+}
+function bytesToProjectBase64(bytes){let s='',chunk=0x8000;for(let i=0;i<bytes.length;i+=chunk)s+=String.fromCharCode.apply(null,bytes.subarray(i,Math.min(i+chunk,bytes.length)));return btoa(s)}
+function projectBase64ToBytes(s){const bin=atob(s),out=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)out[i]=bin.charCodeAt(i)&255;return out}
+function projectByteArray(bytes){return{encoding:'base64',length:bytes.length,data:bytesToProjectBase64(bytes)}}
+function projectBytesFromJson(v){
+  if(v==null)return null;
+  if(v instanceof Uint8Array)return v;
+  if(Array.isArray(v))return new Uint8Array(v);
+  if(typeof v==='object'&&v.encoding==='base64'&&typeof v.data==='string'){
+    const out=projectBase64ToBytes(v.data);
+    if(typeof v.length==='number'&&out.length!==v.length)throw Error(`Project binary payload length mismatch: expected ${v.length}, decoded ${out.length}`);
+    return out;
+  }
+  throw Error('Unsupported project binary payload encoding');
+}
+function operaNameLooksValidForDiff(name){return !!name&&name.length<=31&&!/[\x00-\x1f\x7f]/.test(name)&&name!=='.'&&name!=='..'}
+function operaEntryPayloadValidForDiff(d,e){
+  const bs=Number(e.blockSize),bc=Number(e.blockCount),bytes=Number(e.byteCount),copy=Number(e.copies&&e.copies[0]);
+  if(!Number.isFinite(bs)||!Number.isFinite(bc)||!Number.isFinite(bytes)||!Number.isFinite(copy))return false;
+  if(bs<=0||bc<0||bytes<0||copy<0)return false;
+  const maxBlocks=Math.ceil(d.length/Math.max(1,bs))+2;
+  if(bc>maxBlocks)return false;
+  const alloc=bc*bs,start=copy*bs,end=start+bytes;
+  if(!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||!Number.isSafeInteger(alloc))return false;
+  if(bytes>alloc&&!e.isDir)return false;
+  if(start<0||start>d.length)return false;
+  if(e.isDir)return start+Math.max(1,Math.min(alloc,bs))<=d.length;
+  return end<=d.length;
+}
+function parseDirBlockForDiff(d,bs,blk,warnings,prefix){
+  const out=[];
+  if(!Number.isFinite(bs)||bs<512||bs>65536)throw Error(`Invalid OperaFS block size ${bs}`);
+  const base=blk*bs;
+  if(!Number.isSafeInteger(base)||base<0||base+24>d.length){warnings.push(`${prefix||'/'}: skipped directory block ${blk} outside image`);return out}
+  const firstFree=u32be(d,base+12),firstEntry=u32be(d,base+16);
+  if(firstEntry<20||firstEntry>bs||firstFree<firstEntry||firstFree>bs){warnings.push(`${prefix||'/'}: skipped malformed directory block ${blk} (firstEntry=${firstEntry}, firstFree=${firstFree})`);return out}
+  let p=base+firstEntry,end=base+firstFree,guard=0;
+  while(p+68<=end&&guard++<4096){
+    const flags=u32be(d,p),type4=ascii(d,p+8,4),entryBlockSize=u32be(d,p+12),byteCount=u32be(d,p+16),blockCount=u32be(d,p+20),name=ascii(d,p+32,32),lastCopy=u32be(d,p+64);
+    if(!operaNameLooksValidForDiff(name)){warnings.push(`${prefix||'/'}: stopped at invalid OperaFS entry name in block ${blk}`);break}
+    if(lastCopy>64||p+68+4*(lastCopy+1)>end){warnings.push(`${prefix||'/'}: stopped at malformed OperaFS copy table for ${name}`);break}
+    const copies=[];for(let i=0;i<=lastCopy;i++)copies.push(u32be(d,p+68+i*4));
+    const entrySize=68+4*(lastCopy+1),isDir=((flags&7)===7)||type4==='*dir';
+    const e={name,flags,blockSize:entryBlockSize,byteCount,blockCount,lastCopy,copies,absoluteEntryOffset:p,dirBlock:blk,dirBase:base,dirFirstFreeOffset:base+12,entrySize,allocationBytes:blockCount*entryBlockSize,firstCopyOffset:copies[0]*entryBlockSize,type4,isDir};
+    if(operaEntryPayloadValidForDiff(d,e))out.push(e);
+    else warnings.push(`${prefix||'/'}: skipped impossible OperaFS entry ${name} (blockSize=${entryBlockSize}, byteCount=${byteCount}, blockCount=${blockCount}, firstCopy=${copies[0]})`);
+    p+=entrySize;
+    if(flags&0xc0000000)break;
+  }
+  return out;
+}
+function parseOperaRootForDiff(d,warnings){const sb=parseOperaSuper(d),r=parseDirBlockForDiff(d,sb.blockSize,sb.rootCopies[0],warnings,'/');for(const e of r)e.path=e.name;r.super=sb;return r}
+function parseOperaAllFilesForDiff(d,warnings){
+  const sb=parseOperaSuper(d),all=[],seen=new Set();
+  function walk(copies,prefix,depth=0,dirBlocks=1){
+    if(depth>24){warnings.push(`${prefix||'/'}: directory recursion limit reached`);return}
+    let first=[];
+    for(const blk of copies||[]){
+      for(let bi=0;bi<Math.max(1,Math.min(dirBlocks||1,64));bi++){
+        const db=blk+bi,key=db+':'+prefix;
+        if(seen.has(key))continue;seen.add(key);
+        const arr=parseDirBlockForDiff(d,sb.blockSize,db,warnings,prefix||'/');
+        if(blk===copies[0])first=first.concat(arr);
+        for(const e of arr){e.path=prefix?prefix+'/'+e.name:e.name;all.push(e)}
+      }
+    }
+    for(const e of first||[])if(e.isDir&&e.name!=='.'&&e.name!=='..')walk(e.copies,prefix?prefix+'/'+e.name:e.name,depth+1,e.blockCount||1);
+  }
+  walk(sb.rootCopies,'',0,1);all.super=sb;return all;
+}
+function isoDiffHash(bytes){return bytesHexUpper(md5BytesSync(bytes))}
+function isoDiffFileBytes(info,e){
+  const start=Number(e.firstCopyOffset),len=Number(e.byteCount),end=start+len,path=e.path||e.name||'(unnamed)';
+  if(!Number.isFinite(start)||!Number.isFinite(len)||!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start<0||len<0||end>info.iso.length)throw Error(`Invalid OperaFS allocation for ${path}: start=${start}, length=${len}, image=${info.iso.length}`);
+  return info.iso.slice(start,end);
+}
+function isoDiffFileMap(info){
+  const map=new Map();
+  for(const e of uniqueOperaEntries(info.allFiles&&info.allFiles.length?info.allFiles:info.root,false)){
+    const p=operaNormPath(e.path||e.name);
+    map.set(operaPathUpper(p),{entry:e,path:p,bytes:null,hash:null});
+  }
+  return map;
+}
+function parseRezInfoForDiff(bytes){
+  if(ascii(bytes,0,4)!=='BRGR')throw Error('Not BRGR REZ');
+  const groups=u32be(bytes,4),memSize=u32be(bytes,8),entries=[],glist=[];let p=12;
+  for(let g=0;g<groups;g++){
+    if(p+12>bytes.length)throw Error('REZ group table outside file');
+    const typeId=u32be(bytes,p),first=u32be(bytes,p+4),cnt=u32be(bytes,p+8);p+=12;
+    const group={typeId,first,count:cnt,entries:[]};glist.push(group);
+    for(let i=0;i<cnt;i++){
+      if(p+12>bytes.length)throw Error('REZ entry table outside file');
+      const raw=u32be(bytes,p),len=u32be(bytes,p+4),mp=u32be(bytes,p+8);p+=12;
+      const rid=first+i,[category,name]=catName(rid);
+      const e={typeId,resourceId:rid,indexInGroup:i,rawOffset:raw,offset:raw&RESOURCE_OFFSET_MASK,length:len,flags:raw&RESOURCE_FLAG_MASK,category,name,mp};
+      if(e.offset+e.length>bytes.length)throw Error(`REZ payload outside file for resource ${rid}`);
+      entries.push(e);group.entries.push(e);
+    }
+  }
+  return{bytes,groups:glist,entries,memSize};
+}
+function rezDiffPayload(info,e){return info.bytes.slice(e.offset,e.offset+e.length)}
+function rezTablesCompatibleForDiff(baseRez,modRez){
+  if(baseRez.groups.length!==modRez.groups.length)return false;
+  for(let gi=0;gi<baseRez.groups.length;gi++){
+    const bg=baseRez.groups[gi],mg=modRez.groups[gi];
+    if(bg.typeId!==mg.typeId||bg.first!==mg.first||bg.count!==mg.count||bg.entries.length!==mg.entries.length)return false;
+    for(let ei=0;ei<bg.entries.length;ei++){
+      const be=bg.entries[ei],me=mg.entries[ei];
+      if(be.resourceId!==me.resourceId||be.typeId!==me.typeId||be.flags!==me.flags||be.mp!==me.mp)return false;
+    }
+  }
+  return true;
+}
+function appendRezDiffToProject(baseBytes,modBytes,project,summary,warnings){
+  let bRez,mRez;
+  try{bRez=parseRezInfoForDiff(baseBytes);mRez=parseRezInfoForDiff(modBytes)}catch(e){warnings.push(`REZFILE resource diff failed (${e.message}); storing modified REZFILE as a whole OperaFS replacement.`);project.replacements.push(['REZFILE',projectByteArray(modBytes)]);summary.rootChanged++;return}
+  if(!rezTablesCompatibleForDiff(bRez,mRez)){
+    warnings.push('REZFILE resource table/layout differs; storing modified REZFILE as a whole OperaFS replacement.');
+    project.replacements.push(['REZFILE',projectByteArray(modBytes)]);summary.rootChanged++;
+    return;
+  }
+  let changed=0;
+  for(let i=0;i<bRez.entries.length;i++){
+    const be=bRez.entries[i],me=mRez.entries[i],bb=rezDiffPayload(bRez,be),mb=rezDiffPayload(mRez,me);
+    if(bb.length!==mb.length||isoDiffHash(bb)!==isoDiffHash(mb)){
+      project.rezReplacements.push([me.resourceId,projectByteArray(mb)]);
+      changed++;
+    }
+  }
+  summary.rezChanged+=changed;
+}
+function appendBannerDiffToProject(baseInfo,modInfo,project,summary,warnings){
+  let br,mr;
+  try{br=getBannerRegion3do(baseInfo.iso);mr=getBannerRegion3do(modInfo.iso)}catch(e){warnings.push(`Banner diff skipped: ${e.message}`);return}
+  const len=Math.min(br.length,mr.length,baseInfo.iso.length-br.offset,modInfo.iso.length-mr.offset);
+  if(len<=0)return;
+  const bb=baseInfo.iso.slice(br.offset,br.offset+len),mb=modInfo.iso.slice(mr.offset,mr.offset+len);
+  if(bb.length===mb.length&&isoDiffHash(bb)===isoDiffHash(mb))return;
+  try{
+    validateBannerBytes(mb);
+    project.bannerReplacement=projectByteArray(mb);
+    project.bannerFile={name:'banner.banner',bytes:projectByteArray(mb),custom:true,queued:true};
+    summary.bannerChanged=1;
+  }catch(e){warnings.push(`Fixed banner region differs, but modified banner is not a valid 320x240 APPSCRN banner (${e.message}); skipped.`)}
+}
+function buildIsoDiffProject(baseInfo,modInfo){
+  const project={version:6,source:'iso-content-diff',replacements:[],rezReplacements:[],bannerReplacement:null,bannerFile:null,launchMeFile:null,launchMeReplacement:null,mapDeleted:[],mapDeletedByMap:[],operaDeletes:[],operaRenames:[],operaNewFiles:[],isoDiff:{createdAt:new Date().toISOString(),baseName:baseInfo.name,modifiedName:modInfo.name,baseReport:baseInfo.report,modifiedReport:modInfo.report,warnings:[]}};
+  const summary={rootChanged:0,rezChanged:0,added:0,deleted:0,renamed:0,bannerChanged:0,unchanged:0};
+  const warnings=project.isoDiff.warnings;for(const w of baseInfo.parseWarnings||[])warnings.push('base: '+w);for(const w of modInfo.parseWarnings||[])warnings.push('modified: '+w);const bmap=isoDiffFileMap(baseInfo),mmap=isoDiffFileMap(modInfo);
+  const deleted=[],added=[];
+  for(const [key,b] of bmap){
+    const m=mmap.get(key);
+    if(!m){deleted.push(b);continue}
+    b.bytes=isoDiffFileBytes(baseInfo,b.entry);m.bytes=isoDiffFileBytes(modInfo,m.entry);
+    b.hash=isoDiffHash(b.bytes);m.hash=isoDiffHash(m.bytes);
+    if(b.hash===m.hash&&b.bytes.length===m.bytes.length){summary.unchanged++;continue}
+    if(key==='REZFILE')appendRezDiffToProject(b.bytes,m.bytes,project,summary,warnings);
+    else{project.replacements.push([b.path,projectByteArray(m.bytes)]);summary.rootChanged++}
+  }
+  for(const [key,m] of mmap){if(!bmap.has(key))added.push(m)}
+  // Treat same-directory delete+add with identical content as a rename. Other moves remain delete+add.
+  for(const a of added){a.bytes=isoDiffFileBytes(modInfo,a.entry);a.hash=isoDiffHash(a.bytes)}
+  for(const d of deleted){d.bytes=isoDiffFileBytes(baseInfo,d.entry);d.hash=isoDiffHash(d.bytes)}
+  const usedAdded=new Set(),usedDeleted=new Set();
+  for(let di=0;di<deleted.length;di++){
+    const d=deleted[di];
+    for(let ai=0;ai<added.length;ai++){
+      if(usedAdded.has(ai))continue;
+      const a=added[ai];
+      if(operaDirName(d.path)===operaDirName(a.path)&&d.bytes.length===a.bytes.length&&d.hash===a.hash){
+        project.operaRenames.push([d.path,a.path]);usedDeleted.add(di);usedAdded.add(ai);summary.renamed++;break;
+      }
+    }
+  }
+  for(let di=0;di<deleted.length;di++)if(!usedDeleted.has(di)){project.operaDeletes.push(deleted[di].path);summary.deleted++}
+  for(let ai=0;ai<added.length;ai++)if(!usedAdded.has(ai)){project.operaNewFiles.push([added[ai].path,projectByteArray(added[ai].bytes)]);summary.added++}
+  appendBannerDiffToProject(baseInfo,modInfo,project,summary,warnings);
+  project.isoDiff.summary=summary;
+  return project;
+}
+function isoDiffProjectFilename(baseName,modName){return `${cleanName(String(baseName||'base').replace(/\.(cue|iso|bin|img)$/i,''))}_to_${cleanName(String(modName||'modified').replace(/\.(cue|iso|bin|img)$/i,''))}_diff_project.json`}
+async function createIsoDiffProject(){
+  const status=$('isoDiffStatus');
+  try{
+    if(status)status.textContent='Reading and normalizing selected images...';
+    const base=await readIsoFileGroupForDiff($('diffBaseInput')&&$('diffBaseInput').files,'base');
+    const mod=await readIsoFileGroupForDiff($('diffModifiedInput')&&$('diffModifiedInput').files,'modified');
+    if(status)status.textContent='Comparing OperaFS file payloads, REZ resources, and banner data...';
+    const project=buildIsoDiffProject(base,mod),sum=project.isoDiff.summary;
+    const json=JSON.stringify(project,null,2),name=isoDiffProjectFilename(base.name,mod.name);
+    download(name,new Blob([json],{type:'application/json'}));
+    const warn=project.isoDiff.warnings.length?` Warnings: ${project.isoDiff.warnings.join(' | ')}`:'';
+    const msg=`Diff project written: ${name}. REZ resources changed=${sum.rezChanged}, file replacements=${sum.rootChanged}, added=${sum.added}, deleted=${sum.deleted}, renamed=${sum.renamed}, banner=${sum.bannerChanged?'changed':'unchanged'}.${warn}`;
+    if(status)status.textContent=msg;
+    log(msg);
+  }catch(e){
+    const msg='ISO diff failed: '+e.message;
+    if(status)status.textContent=msg;
+    log(msg);
+  }
+}
 function parseOperaSuper(d){if(d.length<132||d[0]!==1||ascii(d,1,5)!=='ZZZZZ')throw Error('Not OperaFS');const blockSize=u32be(d,76),rootLastCopy=u32be(d,96),rootCopies=[];for(let i=0;i<=rootLastCopy&&i<8;i++)rootCopies.push(u32be(d,100+i*4));return{blockSize,rootCopies,label:ascii(d,40,32)}}function parseDirBlock(d,bs,blk){const base=blk*bs,firstFree=u32be(d,base+12),firstEntry=u32be(d,base+16),out=[];let p=base+firstEntry,end=base+firstFree;while(p+68<=end){const flags=u32be(d,p),name=ascii(d,p+32,32),entryBlockSize=u32be(d,p+12),byteCount=u32be(d,p+16),blockCount=u32be(d,p+20),lastCopy=u32be(d,p+64);if(lastCopy>64||p+68+4*(lastCopy+1)>end)break;const copies=[];for(let i=0;i<=lastCopy;i++)copies.push(u32be(d,p+68+i*4));const entrySize=68+4*(lastCopy+1);out.push({name,flags,blockSize:entryBlockSize,byteCount,blockCount,lastCopy,copies,absoluteEntryOffset:p,dirBlock:blk,dirBase:base,dirFirstFreeOffset:base+12,entrySize,allocationBytes:blockCount*entryBlockSize,firstCopyOffset:copies[0]*entryBlockSize,type4:ascii(d,p+8,4),isDir:((flags&7)===7)||ascii(d,p+8,4)==='*dir'});p+=entrySize;if(flags&0xc0000000)break}return out}
 function parseOperaRoot(d){const sb=parseOperaSuper(d),r=parseDirBlock(d,sb.blockSize,sb.rootCopies[0]);for(const e of r)e.path=e.name;r.super=sb;return r}
 function parseOperaAllFiles(d){const sb=parseOperaSuper(d),all=[],seen=new Set();function walk(copies,prefix,depth=0,dirBlocks=1){if(depth>16)return;let first=[];for(const blk of copies){for(let bi=0;bi<Math.max(1,dirBlocks);bi++){const db=blk+bi,key=db+':'+prefix;if(seen.has(key))continue;seen.add(key);const arr=parseDirBlock(d,sb.blockSize,db);if(blk===copies[0])first=first.concat(arr);for(const e of arr){e.path=prefix?prefix+'/'+e.name:e.name;all.push(e)}}}for(const e of first||[])if(e.isDir&&e.name!=='.'&&e.name!=='..')walk(e.copies,prefix?prefix+'/'+e.name:e.name,depth+1,e.blockCount||1)}walk(sb.rootCopies,'',0,1);all.super=sb;return all}
@@ -302,7 +522,7 @@ function updatePreviewButtonsForAsset(a){
     raw.textContent='Download raw audio';
     if(replace)replace.accept='audio/*,.mp3,.wav,.flac,.ogg,.aif,.aiff,.aifc';
   }else{
-    png.textContent='Download PNG';
+    png.textContent=assetHasPngSpritesheet(a)?'Download PNG sheet':'Download PNG';
     raw.textContent='Download raw';
     if(replace)replace.accept='';
   }
@@ -341,23 +561,26 @@ function spriteCurrentImageAndOffsets(a){
 function drawWeaponPspritePreview(a){
   const cn=$('spriteEngineCanvas'),info=$('spriteEngineInfo'),ctx=cn.getContext('2d');
   const {img,left,top}=spriteCurrentImageAndOffsets(a);
-  const screenW=320,screenH=200,viewH=168,statusH=32,baseY=200,weaponTop=32,weaponBottom=128;
+  const screenW=320,screenH=200,viewW=280,viewH=160,statusH=40,screenXOffset=20,screenYOffset=0,weaponTop=32,weaponBottom=128,screenGunY=-40,drawYFix=2;
+  const gunXScale=viewW/320,gunYScale=viewH/160;
   ctx.fillStyle='#050607';ctx.fillRect(0,0,cn.width,cn.height);
-  ctx.fillStyle='#1b2430';ctx.fillRect(0,0,screenW,Math.floor(viewH*.54));
-  ctx.fillStyle='#242018';ctx.fillRect(0,Math.floor(viewH*.54),screenW,viewH-Math.floor(viewH*.54));
+  ctx.fillStyle='#1b2430';ctx.fillRect(screenXOffset,screenYOffset,viewW,Math.floor(viewH*.54));
+  ctx.fillStyle='#242018';ctx.fillRect(screenXOffset,screenYOffset+Math.floor(viewH*.54),viewW,viewH-Math.floor(viewH*.54));
   ctx.fillStyle='#20242c';ctx.fillRect(0,viewH,screenW,statusH);
-  ctx.strokeStyle='#343b49';ctx.strokeRect(.5,.5,screenW-1,viewH-1);ctx.strokeRect(.5,viewH+.5,screenW-1,statusH-1);
-  ctx.fillStyle='#a5adbb';ctx.font='10px ui-monospace,monospace';ctx.fillText('3DO psprite screen preview',8,12);
+  ctx.strokeStyle='#343b49';ctx.strokeRect(screenXOffset+.5,screenYOffset+.5,viewW-1,viewH-1);ctx.strokeRect(.5,viewH+.5,screenW-1,statusH-1);
+  ctx.fillStyle='#a5adbb';ctx.font='10px ui-monospace,monospace';ctx.fillText('3DO DrawAWeapon psprite preview',8,12);
   ctx.strokeStyle='#79b8ff';ctx.beginPath();ctx.moveTo(screenW/2,0);ctx.lineTo(screenW/2,viewH);ctx.stroke();
-  ctx.strokeStyle='#ffcc66';ctx.beginPath();ctx.moveTo(0,baseY+weaponTop-top);ctx.lineTo(screenW,baseY+weaponTop-top);ctx.stroke();
-  ctx.strokeStyle='rgba(255,204,102,.35)';ctx.beginPath();ctx.moveTo(0,baseY+weaponBottom-top);ctx.lineTo(screenW,baseY+weaponBottom-top);ctx.stroke();
+  const readyScreenY=screenYOffset+drawYFix+(weaponTop+screenGunY+top)*gunYScale;
+  const lowerScreenY=screenYOffset+drawYFix+(weaponBottom+screenGunY+top)*gunYScale;
+  ctx.strokeStyle='#ffcc66';ctx.beginPath();ctx.moveTo(0,readyScreenY);ctx.lineTo(screenW,readyScreenY);ctx.stroke();
+  ctx.strokeStyle='rgba(255,204,102,.35)';ctx.beginPath();ctx.moveTo(0,lowerScreenY);ctx.lineTo(screenW,lowerScreenY);ctx.stroke();
   if(!img){if(info)info.textContent='No decodable first-person weapon frame for psprite preview.';return}
   const fit=Math.min(1,(screenW-4)/Math.max(1,img.width),(screenH-4)/Math.max(1,img.height));
   const scale=fit;
-  const readyX=(screenW/2-left)*scale+(screenW*(1-scale)/2);
-  const readyY=(baseY+weaponTop-top)*scale+(screenH*(1-scale)/2);
-  const lowerY=(baseY+weaponBottom-top)*scale+(screenH*(1-scale)/2);
-  const w=img.width*scale,h=img.height*scale;
+  const readyX=(screenXOffset+left*gunXScale)*scale+(screenW*(1-scale)/2);
+  const readyY=readyScreenY*scale+(screenH*(1-scale)/2);
+  const lowerY=lowerScreenY*scale+(screenH*(1-scale)/2);
+  const w=img.width*gunXScale*scale,h=img.height*gunYScale*scale;
   ctx.save();ctx.imageSmoothingEnabled=false;
   ctx.globalAlpha=.22;ctx.drawImage(img,readyX,lowerY,w,h);
   ctx.globalAlpha=1;ctx.drawImage(img,readyX,readyY,w,h);
@@ -365,7 +588,7 @@ function drawWeaponPspritePreview(a){
   ctx.strokeStyle='#7ee787';ctx.strokeRect(Math.round(readyX)+.5,Math.round(readyY)+.5,Math.round(w),Math.round(h));
   ctx.fillStyle='#7ee787';ctx.fillText('ready/top',Math.max(2,Math.min(screenW-58,readyX)),Math.max(10,readyY-4));
   ctx.fillStyle='#a5adbb';ctx.fillText('lowered ghost',Math.max(2,Math.min(screenW-76,readyX)),Math.max(10,Math.min(screenH-4,lowerY-4)));
-  if(info)info.textContent=`First-person weapon psprite preview: x = screen center - leftoffset, y = 200 + WeaponY - topoffset. Ready WeaponY=${weaponTop}, lowered WeaponY=${weaponBottom}. left=${left}, top=${top}, preview scale=${scale.toFixed(2)}x. Yellow line is the ready top baseline; grey line is lowered baseline.`;
+  if(info)info.textContent=`First-person 3DO psprite preview: x = ScreenXOffset + recordX*GunXScale; y = ScreenYOffset + 2 + (WeaponY - 40 + recordY)*GunYScale. WAD imports use Doom/SLADE 320×200 psprite coordinates, scaled vertically to the 3DO 160-line weapon view before this equation; muzzle flashes use active-weapon-relative overlay deltas. Ready WeaponY=${weaponTop}, lowered WeaponY=${weaponBottom}. recordX=${left}, recordY=${top}, scale=${scale.toFixed(2)}x.`;
 }
 function drawWorldSpriteEnginePreview(a){
   const cn=$('spriteEngineCanvas'),info=$('spriteEngineInfo'),ctx=cn.getContext('2d');
@@ -582,7 +805,182 @@ async function canvasFromImageFile(file){
   await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=url});
   const cn=document.createElement('canvas');cn.width=img.naturalWidth;cn.height=img.naturalHeight;cn.getContext('2d').drawImage(img,0,0);URL.revokeObjectURL(url);return cn;
 }
-function encodeSpritePatchRecordFromCanvas(originalBlob,ref,pcCanvas,rid){
+
+// ---- Transparent PNG spritesheet export/import for multi-shape sprite/fixed resources ----
+const PNG_TEXT_KEY='D3DO_SPRITESHEET';
+let PNG_CRC_TABLE=null;
+function pngCrcTable(){
+  if(PNG_CRC_TABLE)return PNG_CRC_TABLE;
+  const t=new Uint32Array(256);
+  for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xedb88320^(c>>>1)):(c>>>1);t[n]=c>>>0}
+  return PNG_CRC_TABLE=t;
+}
+function pngCrc32(bytes){
+  const t=pngCrcTable();let c=0xffffffff;
+  for(let i=0;i<bytes.length;i++)c=t[(c^bytes[i])&255]^(c>>>8);
+  return (c^0xffffffff)>>>0;
+}
+function u32beLocal(v){return new Uint8Array([(v>>>24)&255,(v>>>16)&255,(v>>>8)&255,v&255])}
+function concatU8(parts){let n=0;for(const p of parts)n+=p.length;const out=new Uint8Array(n);let o=0;for(const p of parts){out.set(p,o);o+=p.length}return out}
+function pngInjectTextChunk(u8,keyword,text){
+  if(!u8||u8.length<12||u8[0]!==0x89||u8[1]!==0x50||u8[2]!==0x4e||u8[3]!==0x47)throw Error('not a PNG file');
+  const enc=new TextEncoder(),key=enc.encode(keyword),txt=enc.encode(text),nul=new Uint8Array([0]);
+  const data=concatU8([key,nul,txt]),type=enc.encode('tEXt'),crc=pngCrc32(concatU8([type,data]));
+  const chunk=concatU8([u32beLocal(data.length),type,data,u32beLocal(crc)]);
+  let p=8,insertAt=-1;
+  while(p+12<=u8.length){
+    const len=((u8[p]<<24)|(u8[p+1]<<16)|(u8[p+2]<<8)|u8[p+3])>>>0;
+    const typ=String.fromCharCode(u8[p+4],u8[p+5],u8[p+6],u8[p+7]);
+    if(p+12+len>u8.length)break;
+    if(typ==='IEND'){insertAt=p;break}
+    p+=12+len;
+  }
+  if(insertAt<0)throw Error('PNG IEND chunk not found');
+  return concatU8([u8.slice(0,insertAt),chunk,u8.slice(insertAt)]);
+}
+function pngTextChunks(u8){
+  const out={};
+  if(!u8||u8.length<12||u8[0]!==0x89||u8[1]!==0x50||u8[2]!==0x4e||u8[3]!==0x47)return out;
+  let p=8;
+  while(p+12<=u8.length){
+    const len=((u8[p]<<24)|(u8[p+1]<<16)|(u8[p+2]<<8)|u8[p+3])>>>0;
+    const typ=String.fromCharCode(u8[p+4],u8[p+5],u8[p+6],u8[p+7]);
+    const ds=p+8,de=ds+len;if(de+4>u8.length)break;
+    if(typ==='tEXt'){
+      const data=u8.slice(ds,de);let z=data.indexOf(0);
+      if(z>0){const dec=new TextDecoder();out[dec.decode(data.slice(0,z))]=dec.decode(data.slice(z+1));}
+    }
+    p=de+4;if(typ==='IEND')break;
+  }
+  return out;
+}
+function canvasToPngBlob(cn){return new Promise((res,rej)=>cn.toBlob(b=>b?res(b):rej(Error('PNG encode failed')),'image/png'))}
+async function canvasToPngBlobWithText(cn,keyword,text){
+  const b=await canvasToPngBlob(cn),u8=new Uint8Array(await b.arrayBuffer());
+  return blob(pngInjectTextChunk(u8,keyword,text),'image/png');
+}
+function cropCanvas(src,x,y,w,h){
+  const cn=document.createElement('canvas');cn.width=Math.max(1,w|0);cn.height=Math.max(1,h|0);
+  const ctx=cn.getContext('2d');ctx.clearRect(0,0,cn.width,cn.height);ctx.drawImage(src,x|0,y|0,cn.width,cn.height,0,0,cn.width,cn.height);return cn;
+}
+function assetPngFrameCount(a){
+  try{
+    if(!a||a.root)return 0;
+    const current=a.rid!==undefined?(state.rezReplacements.get(a.rid)||a.raw):a.raw;
+    if(a.kind==='misc')return iterMiscShapeOffsets(current).length;
+    if(a.kind==='sprite')return spriteRefs(current).length;
+    return 1;
+  }catch(_){return 1}
+}
+function assetHasPngSpritesheet(a){return assetPngFrameCount(a)>1&&(a.kind==='misc'||a.kind==='sprite')}
+function pngSheetLayoutForFrames(frames){
+  const maxW=Math.max(1,...frames.map(f=>f.w||1)),maxH=Math.max(1,...frames.map(f=>f.h||1));
+  const pad=2,cols=Math.max(1,Math.ceil(Math.sqrt(frames.length))),rows=Math.ceil(frames.length/cols);
+  for(let i=0;i<frames.length;i++){const c=i%cols,r=Math.floor(i/cols);frames[i].x=pad+c*(maxW+pad);frames[i].y=pad+r*(maxH+pad)}
+  return{padding:pad,columns:cols,rows,cellWidth:maxW,cellHeight:maxH,width:pad+cols*(maxW+pad),height:pad+rows*(maxH+pad)};
+}
+function spritesheetFramesForAsset(a){
+  const current=state.rezReplacements.get(a.rid)||a.raw,frames=[];
+  if(a.kind==='misc'){
+    const offs=iterMiscShapeOffsets(current);
+    for(let i=0;i<offs.length;i++){const img=decodeMiscAsset({...a,raw:current},i);if(img)frames.push({kind:'misc',index:i,shapeIndex:i,w:img.width,h:img.height,img});}
+  }else if(a.kind==='sprite'){
+    const refs=spriteRefs(current);
+    for(let i=0;i<refs.length;i++){
+      const img=decodeSpriteAsset({...a,raw:current},i);if(!img)continue;
+      const off=spritePatchOffsets(current,refs[i])||{left:0,top:img.height};
+      frames.push({kind:'sprite',index:i,frame:refs[i].frame,rot:refs[i].rot,flip:!!refs[i].flip,w:img.width,h:img.height,left:off.left,top:off.top,img});
+    }
+  }
+  return frames;
+}
+function buildSpritesheetForAsset(a){
+  const frames=spritesheetFramesForAsset(a);if(frames.length<2)throw Error('asset does not contain multiple PNG frames');
+  const layout=pngSheetLayoutForFrames(frames);
+  const cn=document.createElement('canvas');cn.width=layout.width;cn.height=layout.height;
+  const ctx=cn.getContext('2d');ctx.clearRect(0,0,cn.width,cn.height);ctx.imageSmoothingEnabled=false;
+  for(const f of frames)ctx.drawImage(f.img,f.x,f.y);
+  const meta={type:'doom3do-web-studio-spritesheet',version:1,kind:a.kind,resourceId:a.rid,name:a.name,layout:{padding:layout.padding,columns:layout.columns,rows:layout.rows,cellWidth:layout.cellWidth,cellHeight:layout.cellHeight,width:layout.width,height:layout.height},frames:frames.map(f=>{const o={index:f.index,w:f.w,h:f.h,x:f.x,y:f.y};if(a.kind==='misc')o.shapeIndex=f.shapeIndex;if(a.kind==='sprite'){o.frame=f.frame;o.rot=f.rot;o.flip=f.flip;o.left=f.left;o.top=f.top;}return o;})};
+  return{canvas:cn,meta};
+}
+function currentSpritesheetMetaForAsset(a){const built=buildSpritesheetForAsset(a);return built.meta}
+function spritesheetMetaMatchesAsset(meta,a){
+  if(!meta||meta.type!=='doom3do-web-studio-spritesheet')return false;
+  if(meta.kind!==a.kind)return false;
+  if(meta.resourceId!==undefined&&a.rid!==undefined&&Number(meta.resourceId)!==Number(a.rid))return false;
+  return Array.isArray(meta.frames)&&meta.frames.length>0;
+}
+async function readPngSpritesheetMeta(file){
+  if(!/^image\/png$/i.test(file.type||'')&&!/\.png$/i.test(file.name||''))return null;
+  try{const bytes=await fileBytes(file),txt=pngTextChunks(bytes)[PNG_TEXT_KEY];return txt?JSON.parse(txt):null}catch(_){return null}
+}
+async function maybeSpritesheetImport(file,a,cn){
+  if(!a||!(a.kind==='misc'||a.kind==='sprite'))return null;
+  let meta=await readPngSpritesheetMeta(file);
+  if(meta&&!spritesheetMetaMatchesAsset(meta,a))return null;
+  if(!meta&&assetHasPngSpritesheet(a)){
+    try{const fallback=currentSpritesheetMetaForAsset(a);if(cn.width===fallback.layout.width&&cn.height===fallback.layout.height)meta=fallback;}catch(_){/* no fallback */}
+  }
+  if(!meta)return null;
+  return meta;
+}
+function frameFromSheet(cn,f){return cropCanvas(cn,f.x|0,f.y|0,f.w|0,f.h|0)}
+function importMiscSpritesheet(a,cn,meta){
+  let current=state.rezReplacements.get(a.rid)||a.raw,done=0;
+  for(const f of meta.frames){
+    const idx=Number.isFinite(f.shapeIndex)?f.shapeIndex:f.index;if(!Number.isFinite(idx))continue;
+    const offs=iterMiscShapeOffsets(current);if(idx<0||idx>=offs.length)continue;
+    const crop=frameFromSheet(cn,f),h=parseCcbHeader(current,offs[idx]);let img=crop;
+    if(h&&(img.width!==h.width||img.height!==h.height))img=imageCanvasResize(img,h.width,h.height);
+    const rec=encodeCcbRecordFromCanvas(current,offs[idx],img,false,true);
+    current=rebuildMiscResourceWithShape(current,idx,rec);done++;
+  }
+  if(!done)throw Error('spritesheet had no importable fixed-graphic frames');
+  state.rezReplacements.set(a.rid,current);updateAssetRawByRid(a.rid,current);a.raw=current;state.selectedMiscShapeIndex=0;
+  log(`Imported transparent fixed-graphic spritesheet for ${a.name}: ${done} shape(s), ${current.length} bytes.`);
+  showPreview(a);refreshAssets();
+}
+function importSpriteSpritesheet(a,cn,meta){
+  const current=state.rezReplacements.get(a.rid)||a.raw,refs=spriteRefs(current),recs=new Map();let done=0;
+  for(const f of meta.frames){
+    let ref=null;
+    if(Number.isFinite(f.index)&&refs[f.index])ref=refs[f.index];
+    if(!ref)ref=refs.find(r=>r.frame===f.frame&&((r.rot===null&&f.rot===null)||(r.rot!==null&&Number(r.rot)===Number(f.rot))));
+    if(!ref)continue;
+    const crop=frameFromSheet(cn,f);
+    const off={left:Number.isFinite(f.left)?f.left:(spritePatchOffsets(current,ref)||{left:0}).left,top:Number.isFinite(f.top)?f.top:(spritePatchOffsets(current,ref)||{top:crop.height}).top};
+    const rec=encodeSpritePatchRecordFromCanvas(current,ref,crop,a.rid,off);
+    recs.set(refKey(ref),rec);done++;
+  }
+  if(!done)throw Error('spritesheet had no importable sprite frames');
+  const rebuilt=rebuildSpriteResource(current,recs);
+  state.rezReplacements.set(a.rid,rebuilt);updateAssetRawByRid(a.rid,rebuilt);a.raw=rebuilt;state.selectedSpriteFrameIndex=0;
+  log(`Imported transparent sprite spritesheet for ${a.name}: ${done} frame(s), ${current.length}->${rebuilt.length} bytes.`);
+  showPreview(a);refreshAssets();
+}
+async function importSpritesheetIfPresent(file,a,cn){
+  const meta=await maybeSpritesheetImport(file,a,cn);if(!meta)return false;
+  if(a.kind==='misc')importMiscSpritesheet(a,cn,meta);
+  else if(a.kind==='sprite')importSpriteSpritesheet(a,cn,meta);
+  else return false;
+  return true;
+}
+async function downloadSelectedPngAsset(){
+  const a=state.selectedAsset;if(!a)return;
+  if(isAudioAsset(a)){playRootAudio(a.root,'assetAudioPlayer');return}
+  try{
+    if(assetHasPngSpritesheet(a)){
+      const built=buildSpritesheetForAsset(a);
+      const out=await canvasToPngBlobWithText(built.canvas,PNG_TEXT_KEY,JSON.stringify(built.meta));
+      download(cleanName(a.name)+'_spritesheet.png',out);
+      log(`Exported transparent ${a.kind} spritesheet ${a.name}: ${built.meta.frames.length} frame(s), ${built.canvas.width}x${built.canvas.height}.`);
+      return;
+    }
+    const img=decodeAsset(a,state.selectedSpriteFrameIndex||state.selectedMiscShapeIndex||0);
+    if(img)download(cleanName(a.name)+'.png',await canvasToPngBlob(img));else log('No PNG decoder for this asset yet');
+  }catch(e){log('PNG export failed: '+e.message)}
+}
+function encodeSpritePatchRecordFromCanvas(originalBlob,ref,pcCanvas,rid,offsetOverride=null){
   const h=parseCcbHeader(originalBlob,ref.off+4);if(!h)throw Error('selected sprite patch has no valid CCB');
   let img=pcCanvas;
   if(isFirstPersonWeaponSpriteRid(rid)&&ref.rot===null)img=rotateCwCanvas(img);
@@ -594,6 +992,15 @@ function encodeSpritePatchRecordFromCanvas(originalBlob,ref,pcCanvas,rid){
   // Keep a normal 64-byte PLUT immediately after the 4-byte patch header + 60-byte CCB.
   // DrawSpriteClip uses patch+64 as SpritePLUT, so custom sprites must not drop or bypass it.
   const p=new Uint8Array(Math.max(prefix.length,128));p.set(prefix);
+  if(offsetOverride){
+    const left=clampSpriteOffset(offsetOverride.left,'import sprite left offset');
+    const top=clampSpriteOffset(offsetOverride.top,'import sprite top offset');
+    // 3DO sprite records keep the sprite draw/origin offset in the first four bytes,
+    // big-endian.  World sprites use Doom patch-origin semantics; first-person
+    // psprites use a 3DO-specific screen-space transform supplied by the WAD
+    // import offset logic.
+    w16be(p,0,left&0xffff);w16be(p,2,top&0xffff);
+  }
   write555Palette(p.subarray(64,128),p555,64);
   const flags=(h.flags|0x00000200)&~(0x10000000|0x08000000);
   // The clipped sprite path does not use the CCB parser. It assumes:
@@ -906,6 +1313,7 @@ async function replaceSelectedRezAssetFromFile(file){
     const b=await fileBytes(file);setRezReplacement(a,b,'raw REZ asset');return;
   }
   const cn=await canvasFromImageFile(file);
+  if(await importSpritesheetIfPresent(file,a,cn))return;
   if(a.kind==='wall')setRezReplacement(a,encodeWallFromCanvas(a,cn),'wall PNG');
   else if(a.kind==='flat')setRezReplacement(a,encodeFlatFromCanvas(a,cn),'flat PNG');
   else if(a.kind==='misc')setRezReplacement(a,encodeMiscFromCanvas(a,cn),'fixed/misc PNG');
@@ -953,8 +1361,10 @@ function applyEditedMapToRez(quiet=false){
 async function replaceSelectedSpriteFromFile(file){
   const a=state.selectedAsset;if(!a||a.kind!=='sprite')throw Error('select a sprite asset first');
   const current=state.rezReplacements.get(a.rid)||a.raw,refs=spriteRefs(current);if(!refs.length)throw Error('sprite resource has no patch refs');
+  const pcCanvas=await canvasFromImageFile(file);
+  if(await importSpritesheetIfPresent(file,a,pcCanvas))return;
   const idx=Math.max(0,Math.min(refs.length-1,parseInt($('spriteFrameSelect').value||state.selectedSpriteFrameIndex||0,10))),ref=refs[idx];
-  const pcCanvas=await canvasFromImageFile(file),record=encodeSpritePatchRecordFromCanvas(current,ref,pcCanvas,a.rid);
+  const record=encodeSpritePatchRecordFromCanvas(current,ref,pcCanvas,a.rid);
   const recs=new Map();recs.set(refKey(ref),record);
   const newBlob=rebuildSpriteResource(current,recs);
   state.rezReplacements.set(a.rid,newBlob);
@@ -1264,7 +1674,7 @@ function synthesizeSingleSubsectorNodes(map){
 }
 function sanitizeImportedMap(map){
   const order=['THINGS','LINEDEFS','SIDEDEFS','VERTEXES','SEGS','SSECTORS','NODES','SECTORS','REJECT','BLOCKMAP'];
-  const out={name:map.name,lumps:{},generatedNode:false};
+  const out={name:map.name,lumps:{},generatedNode:false,raw32x:!!map.raw32x,sourceEndian:map.sourceEndian||null,embeddedOffset:map.embeddedOffset||0};
   for(const k of order)if(map.lumps[k])out.lumps[k]=normalizeImportedMapLump(k,map.lumps[k]);
   synthesizeSingleSubsectorNodes(out);
   return out;
@@ -1423,23 +1833,42 @@ function parseTextures(){
   }
   return out;
 }
-function decodeDoomPatchCanvas(bytes,pal){
+function doomPatchInfo(bytes){
   if(!bytes||bytes.length<8)return null;
-  const w=u16le(bytes,0),h=u16le(bytes,2);if(w<=0||h<=0||w>2048||h>2048)return null;
+  const w=u16le(bytes,0),h=u16le(bytes,2),left=s16le(bytes,4),top=s16le(bytes,6);
+  if(w<=0||h<=0||w>2048||h>2048||8+w*4>bytes.length)return null;
+  for(let x=0;x<w;x++){
+    const co=8+x*4,p0=u32le(bytes,co);
+    if(p0<8||p0>=bytes.length)return null;
+    let p=p0,guard=0,terminated=false;
+    while(p<bytes.length&&guard++<h+2048){
+      const topDelta=bytes[p++];if(topDelta===255){terminated=true;break}
+      if(p+2>bytes.length)return null;
+      const len=bytes[p++];p++; // unused byte before pixel data
+      if(len<0||p+len+1>bytes.length)return null;
+      p+=len+1; // pixel bytes plus trailing unused byte
+    }
+    if(!terminated)return null;
+  }
+  return{width:w,height:h,left,top};
+}
+function decodeDoomPatchCanvas(bytes,pal){
+  const meta=doomPatchInfo(bytes);if(!meta)return null;
+  const w=meta.width,h=meta.height;
   const cn=document.createElement('canvas');cn.width=w;cn.height=h;const ctx=cn.getContext('2d'),id=ctx.createImageData(w,h),out=id.data;
   for(let i=0;i<out.length;i++)out[i]=0;
   for(let x=0;x<w;x++){
-    const co=8+x*4;if(co+4>bytes.length)break;let p=u32le(bytes,co);
-    if(p<8||p>=bytes.length)return null;
+    const co=8+x*4;let p=u32le(bytes,co);
     while(p<bytes.length){const top=bytes[p++];if(top===255)break;if(p>=bytes.length)break;const len=bytes[p++];p++;for(let y=0;y<len&&p<bytes.length;y++,p++){const c=pal[bytes[p]]||[0,0,0,255],yy=top+y;if(yy>=0&&yy<h){const o=(yy*w+x)*4;out[o]=c[0];out[o+1]=c[1];out[o+2]=c[2];out[o+3]=255}}p++}
   }
   ctx.putImageData(id,0,0);return cn;
 }
-function rawPalettedCanvas(bytes,pal,w=64,h=64,columnMajor=false,offset=0){
-  if(!bytes||bytes.length<offset+w*h)return null;
+function rawPalettedCanvas(bytes,pal,w=64,h=64,columnMajor=false,offset=0,columnPad=0){
+  const stride=columnMajor?h+(columnPad|0):w;
+  if(!bytes||w<=0||h<=0||offset<0||bytes.length<offset+(columnMajor?w*stride:w*h))return null;
   const cn=document.createElement('canvas');cn.width=w;cn.height=h;const ctx=cn.getContext('2d'),id=ctx.createImageData(w,h),out=id.data;
   for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-    const idx=columnMajor?offset+x*h+y:offset+y*w+x,c=pal[bytes[idx]]||[0,0,0,255],o=(y*w+x)*4;
+    const idx=columnMajor?offset+x*stride+y:offset+y*w+x,c=pal[bytes[idx]]||[0,0,0,255],o=(y*w+x)*4;
     out[o]=c[0];out[o+1]=c[1];out[o+2]=c[2];out[o+3]=255;
   }
   ctx.putImageData(id,0,0);return cn;
@@ -1466,24 +1895,35 @@ function renderRaw64Canvas(bytes,pal){
   // Floors/flats are row-major 64x64 palette indices.
   return bytes&&bytes.length>=4096?rawPalettedCanvas(bytes,pal,64,64,false,0,0):null;
 }
+function composeWadTextureCanvas(tex,pal){
+  if(!tex||!tex.patches||!tex.patches.length)return null;
+  const cn=document.createElement('canvas');cn.width=tex.width;cn.height=tex.height;const ctx=cn.getContext('2d');ctx.clearRect(0,0,cn.width,cn.height);
+  let drew=false;
+  for(const p of tex.patches){const pl=wadFirst(p.patch);const pc=pl&&decodeDoomPatchCanvas(pl.data,pal);if(pc){ctx.drawImage(pc,p.x,p.y);drew=true}}
+  return drew?cn:null;
+}
+function isExactRawTexturePayload(bytes,w,h){
+  if(!bytes||!w||!h)return false;
+  const pix=(w|0)*(h|0);
+  return pix>0&&(bytes.length===pix||bytes.length===pix+320);
+}
 function renderWadTextureCanvas(name,textures,pal){
   name=String(name).toUpperCase();
-  const tex=textures.get(name),l=wadFirst(name);
+  const tex=textures.get(name),l=wadFirst(name),is32x=is32xWadSource();
+  // PC/Freedoom IWAD texture names may also have a patch lump with the same
+  // name.  Do not treat arbitrary Doom patch bytes as raw column-major pixels:
+  // that was the cause of the striped/corrupt SKY1 import.  Prefer TEXTURE1
+  // composition for normal WADs, and only use raw texture decoding when the
+  // payload length exactly matches a known console/raw texture payload.
+  if(tex&&!is32x){const comp=composeWadTextureCanvas(tex,pal);if(comp)return comp}
   if(l){
-    // If TEXTURE1 knows the size, prefer the wad32x-exported raw texture
-    // format: column-major width×height pixels plus optional 320-byte trailer.
-    // PLAT1 from the 32X ROM is 128×128 + 320 bytes and must decode this way.
-    if(tex){const rawTex=renderRawTextureCanvas(l.data,pal,tex.width,tex.height);if(rawTex)return rawTex}
+    if(!is32x){const patch=decodeDoomPatchCanvas(l.data,pal);if(patch)return patch}
+    if(tex&&isExactRawTexturePayload(l.data,tex.width,tex.height)){const rawTex=renderRawTextureCanvas(l.data,pal,tex.width,tex.height);if(rawTex)return rawTex}
     const c32=render32xTextureCanvas(l.data,pal);if(c32)return c32;
-    const raw=renderRaw64Canvas(l.data,pal);if(raw)return raw;
-    const patch=decodeDoomPatchCanvas(l.data,pal);if(patch)return patch;
+    if(l.data.length===4096){const raw=renderRaw64Canvas(l.data,pal);if(raw)return raw}
+    if(is32x){const patch=decodeDoomPatchCanvas(l.data,pal);if(patch)return patch}
   }
-  if(tex&&tex.patches&&tex.patches.length){
-    const cn=document.createElement('canvas');cn.width=tex.width;cn.height=tex.height;const ctx=cn.getContext('2d');ctx.clearRect(0,0,cn.width,cn.height);
-    let drew=false;
-    for(const p of tex.patches){const pl=wadFirst(p.patch);const pc=pl&&decodeDoomPatchCanvas(pl.data,pal);if(pc){ctx.drawImage(pc,p.x,p.y);drew=true}}
-    if(drew)return cn;
-  }
+  if(tex){const comp=composeWadTextureCanvas(tex,pal);if(comp)return comp}
   return null;
 }
 function inferRawSquareTextureCanvas(bytes,pal){
@@ -1632,6 +2072,247 @@ function normalizeSpriteImportCanvas(name,rid,rot,cn){
   if(is32xWadSource()&&rid>=385&&rid<=392&&rot===null)return stretchCanvasNearest(cn,cn.width*2,cn.height);
   return cn;
 }
+function wadSpriteOffsetMode(){const e=$('wadSpriteOffsetMode');return e?e.value:'wad'}
+function freedoomUiFixesEnabled(){const e=$('freedoomUiFixes');return e?!!e.checked:true}
+function spriteStockPatchInfo(rid,frame,rot){
+  const blob=originalAssetBlobByRid(rid);if(!blob)return null;
+  const refs=spriteRefs(blob),ref=refs.find(r=>r.frame===frame&&((rot===null&&r.rot===null)||(rot!==null&&r.rot===rot)));
+  if(!ref||ref.off<0||ref.off+68>blob.length)return null;
+  const h=parseCcbHeader(blob,ref.off+4);
+  // Sprite CCBs are transposed relative to the PC-facing canvas used by this importer.
+  // Keep both raw CCB dimensions and displayed dimensions; offset fitting must use pcWidth/pcHeight.
+  return{left:s16be(blob,ref.off),top:s16be(blob,ref.off+2),width:h?h.width:0,height:h?h.height:0,pcWidth:h?h.height:0,pcHeight:h?h.width:0,ref};
+}
+function isWeaponFlashFrame(rid,frame,lumpName=''){
+  const n=String(lumpName||'').toUpperCase();
+  if(/^(PISF|SHTF|CHGF|MISF|PLSF|BFGF)/.test(n))return true;
+  const f=frame|0;
+  if(rid===386)return f===3;                 // BIGPISTOL / PISFA0 flash overlay
+  if(rid===387)return f>=4;                  // BIGSHOTGUN / SHTFA/B
+  if(rid===388)return f>=2;                  // BIGCHAINGUN / CHGFA/B
+  if(rid===389)return f>=2;                  // BIGROCKET / MISFA-D
+  if(rid===390)return f>=2;                  // BIGPLASMA / PLSFA/B
+  if(rid===391)return f>=2;                  // BIGBFG / BFGFA/B
+  return false;
+}
+function pspriteAnchorFrameForFlash(rid,frame,lumpName=''){
+  const n=String(lumpName||'').toUpperCase();
+  if(rid===386||/^PISF/.test(n))return 1;      // pistol flash is fired while BIGPISTOL frame 1 is active
+  if(rid===387||/^SHTF/.test(n))return 0;      // shotgun flash overlays the firing/ready barrel frame
+  if(rid===388||/^CHGF/.test(n))return (frame|0)===3?1:0; // chaingun flash alternates with frames 0/1
+  if(rid===389||/^MISF/.test(n))return 1;      // rocket launcher flash follows frame 1
+  if(rid===390||/^PLSF/.test(n))return 0;      // plasma flash follows frame 0
+  if(rid===391||/^BFGF/.test(n))return 1;      // BFG flash follows frame 1
+  return 0;
+}
+function pspriteAnchorLumpNamesForFlash(rid,frame,lumpName=''){
+  const af=pspriteAnchorFrameForFlash(rid,frame,lumpName),n=String(lumpName||'').toUpperCase();
+  if(rid===386||/^PISF/.test(n))return ['PISGB0','PISGA0'];
+  if(rid===387||/^SHTF/.test(n))return ['SHTGA0'];
+  if(rid===388||/^CHGF/.test(n))return af===1?['CHGGB0','CHGGA0']:['CHGGA0','CHGGB0'];
+  if(rid===389||/^MISF/.test(n))return ['MISGB0','MISGA0'];
+  if(rid===390||/^PLSF/.test(n))return ['PLSGA0','PLSGB0'];
+  if(rid===391||/^BFGF/.test(n))return ['BFGGB0','BFGGA0'];
+  return [];
+}
+const DOOM_PSPRITE_SCREEN_W=320,DOOM_PSPRITE_SCREEN_H=200,DOOM_PSPRITE_READY_X=1,DOOM_WEAPON_TOP=32;
+const THREEDO_FULLSCREEN_VIEW_W=280,THREEDO_FULLSCREEN_VIEW_H=160,THREEDO_SCREEN_X_OFFSET=20,THREEDO_SCREEN_Y_OFFSET=0,THREEDO_WEAPON_TOP=32,THREEDO_SCREEN_GUN_Y=-40,THREEDO_WEAPON_DRAW_Y_FIX=2;
+function doomPspriteScreenTopLeft(meta){
+  // Vanilla/Chocolate Doom projects first-person patches in a 320x200 psprite
+  // coordinate space.  At rest psp->sx is FRACUNIT (effectively x=1), and
+  // psp->sy is WEAPONTOP=32.  With pspritescale=1 in the normal 320-wide view,
+  // the patch's PC/SLADE top-left is therefore:
+  //   x = 1 - leftoffset
+  //   y = 32 - topoffset
+  return{x:DOOM_PSPRITE_READY_X-(meta?meta.left:0),y:DOOM_WEAPON_TOP-(meta?meta.top:0)};
+}
+function doomPspriteScreenTo3doView(x,y){
+  // 3DO Doom weapon CCBs are drawn into the 320x160 3DO weapon/view area, not
+  // Doom's 320x200 software-renderer screen.  Horizontal coordinates remain in
+  // the same 320-pixel screen domain; vertical coordinates must be compressed
+  // by 160/200 before solving the 3DO DrawAWeapon record coordinate.  Without
+  // this, negative WAD topoffset weapon frames land about 30-35 pixels too low.
+  return{x:x,y:y*(THREEDO_FULLSCREEN_VIEW_H/DOOM_PSPRITE_SCREEN_H)};
+}
+function doomPspriteScreenTo3doRecord(x,y){
+  // 3DO Doom draws front weapons through DrawAWeapon():
+  //   screenX = ScreenXOffset + (recordX + WeaponX) * GunXScale
+  //   screenY = ScreenYOffset + 2 + (WeaponY + SCREENGUNY + recordY) * GunYScale
+  // In full viewport mode ScreenWidth=280, ScreenHeight=160, ScreenXOffset=20.
+  // Solve those equations for the record coordinates, using WeaponX=0 and
+  // WeaponY=WEAPONTOP for the ready/firing psprite state.
+  const pos=doomPspriteScreenTo3doView(x,y);
+  const gunXScale=THREEDO_FULLSCREEN_VIEW_W/320,gunYScale=THREEDO_FULLSCREEN_VIEW_H/160;
+  return{
+    left:Math.round((pos.x-THREEDO_SCREEN_X_OFFSET)/gunXScale),
+    top:Math.round((pos.y-THREEDO_SCREEN_Y_OFFSET-THREEDO_WEAPON_DRAW_Y_FIX)/gunYScale-THREEDO_WEAPON_TOP-THREEDO_SCREEN_GUN_Y),
+    screenX:pos.x,
+    screenY:pos.y
+  };
+}
+function pspriteDoomProjectedOffset(lump,pcCanvas,rid,frame,rot,meta){
+  if(!meta)return null;
+  const pos=doomPspriteScreenTopLeft(meta),rec=doomPspriteScreenTo3doRecord(pos.x,pos.y);
+  const w=pcCanvas?pcCanvas.width:meta.width,h=pcCanvas?pcCanvas.height:meta.height;
+  const clamped=visiblePspriteOffset(rec.left,rec.top,w,h);
+  return{left:clamped.left,top:clamped.top,source:'doom-slade-psprite-200to160-to-3do',width:meta.width,height:meta.height,doomDrawX:pos.x,doomDrawY:pos.y,threeDoDrawX:rec.screenX,threeDoDrawY:rec.screenY,wadLeft:meta.left,wadTop:meta.top};
+}
+function pspriteTunedLeftFromStock(rid,frame,stock,w,meta=null){
+  // The first two shorts in a 3DO weapon sprite record are screen-space draw
+  // coordinates used directly by DrawAWeapon(), not vanilla Doom world-sprite
+  // origins.  Most guns look correct when their stock 3DO visual center is
+  // preserved.  BIGFISTS is the exception: Freedoom's punch frames use large
+  // negative PC psprite offsets to force the hand/swing to the right side of
+  // the screen.  Center-fitting those frames makes the arm start from the left
+  // side.  For attack fists, convert the PC psprite X convention
+  //   pcDrawX ~= 160 - patch.leftoffset
+  // into a 3DO-safe right-weighted screen coordinate.
+  const f=frame|0;
+  if(rid===385&&meta){
+    if(f===0)return stock.left; // ready fist: keep the known-good 3DO idle anchor
+    // Freedoom's fist/punch psprites are authored with large negative Doom
+    // patch origins.  In vanilla/Chocolate coordinates that places the patch
+    // far to the right: drawX ~= 160 - leftoffset.  The earlier stock-center
+    // fitting path was wrong for fists because it destroyed that right-edge
+    // intent and centered long punch frames on the 3DO viewport.
+    //
+    // Convert the WAD drawX into the 3DO offset convention, but clamp the draw
+    // point to a practical right-edge lane.  This keeps the ready fist stock,
+    // while attack/swing frames stay pinned at the lower-right instead of
+    // sliding to the middle or originating from the left side.
+    const rawDrawX=160-meta.left;
+    const laneMin=(f===1)?214:220;
+    const laneMax=(f===1)?236:246;
+    let drawX=Math.max(laneMin,Math.min(laneMax,rawDrawX));
+    if(w>260)drawX=Math.min(drawX,230); // very wide arm frame: do not expose too much from the left
+    return 160-drawX;
+  }
+  if(rid===387&&f===0){
+    // Shotgun ready/standing frame: use the stock 3DO X anchor.  The firing and
+    // pump frames were already acceptable and continue to use the normal center
+    // preserving transform below.
+    return stock.left;
+  }
+  // General 3DO psprite center preservation.  The sign is intentionally
+  // stockWidth-newWidth; the reverse sign pushes narrow Freedoom weapon frames
+  // left of center.
+  let left=stock.left+(stock.pcWidth-w)/2;
+  if(rid===386)left+=4;          // BIGPISTOL: current centered placement is good; keep small nudge
+  else if(rid===388)left+=2;     // BIGCHAINGUN: keep barrels near the stock center line
+  return left;
+}
+function pspriteTunedTopFromStock(rid,frame,stock,h,meta=null){
+  // Vertical weapon coordinates are also 3DO screen-space draw coordinates.
+  // Keep the earlier baseline for most weapons, but correct the two problem
+  // families from actual in-game feedback: fists must remain bottom-attached
+  // during the swing, while the shotgun ready frame should not be forced down
+  // as far as the firing/pump sequence.
+  const oldTop=stock.top+(h-stock.pcHeight);
+  const bottomTop=stock.top+(stock.pcHeight-h);
+  const f=frame|0;
+  if(rid===385){
+    if(f===0)return stock.top; // idle/ready fist is small; stock top keeps it visible
+    return stock.top+(stock.pcHeight-h)*0.35+8; // swing frames: bottom-biased but not buried
+  }
+  if(rid===387&&f===0){
+    // Shotgun ready/primary frame: earlier tuning pushed this frame too far
+    // down.  Use a shallow stock-bottom blend so the barrel stands in the 3DO
+    // idle position, while firing frames retain their previous placement.
+    return stock.top+(stock.pcHeight-h)*0.25+1;
+  }
+  return oldTop;
+}
+function pspriteBaseStockAnchoredOffset(rid,frame,rot,w,h,meta=null){
+  const stock=spriteStockPatchInfo(rid,frame,rot);if(!stock)return null;
+  const left=pspriteTunedLeftFromStock(rid,frame,stock,w,meta);
+  const top=pspriteTunedTopFromStock(rid,frame,stock,h,meta);
+  const clamped=visiblePspriteOffset(left,top,w,h);
+  return{left:clamped.left,top:clamped.top,source:'3do-psprite-stock-anchor-v4',width:meta?meta.width:w,height:meta?meta.height:h,stockLeft:stock.left,stockTop:stock.top,stockWidth:stock.pcWidth,stockHeight:stock.pcHeight};
+}
+function pspriteDoomProjectedFlashOffset(lump,pcCanvas,rid,frame,rot,meta){
+  if(!meta||!isWeaponFlashFrame(rid,frame,lump&&lump.name))return null;
+  const lname=String(lump&&lump.name||'').toUpperCase(),anchorFrame=pspriteAnchorFrameForFlash(rid,frame,lname);
+  let anchorLump=null,anchorMeta=null,anchorName='';
+  for(const n of pspriteAnchorLumpNamesForFlash(rid,frame,lname)){
+    const l=wadFirst(n),m=l&&doomPatchInfo(l.data);
+    if(l&&m){anchorLump=l;anchorMeta=m;anchorName=n;break}
+  }
+  if(!anchorMeta)return null;
+
+  // Important: ps_flash is not an independent screen sprite.  Both vanilla Doom
+  // and 3DO Doom attach the flash psprite to the weapon psprite's sx/sy or
+  // WeaponX/WeaponY.  Therefore the correct import path is:
+  //   1. project the active weapon frame into 3DO DrawAWeapon record space;
+  //   2. apply the WAD/SLADE top-left delta from active weapon to flash.
+  // v46 projected the flash as an independent absolute sprite and scaled its Y
+  // through 200->160 a second time relative to the weapon.  That made flashes a
+  // few pixels too low; the same absolute projection also over-expanded X on
+  // wide 3DO view sizes.  This relative conversion keeps the Doom-authored
+  // overlay relationship while still placing the weapon itself through the 3DO
+  // scaled psprite model.
+  let aw=anchorMeta.width,ah=anchorMeta.height;
+  if(is32xWadSource()&&rid>=385&&rid<=392){aw*=2;}
+  const anchorCanvas={width:aw,height:ah};
+  const anchor=pspriteDoomProjectedOffset(anchorLump,anchorCanvas,rid,anchorFrame,null,anchorMeta);
+  if(!anchor)return null;
+
+  const dx=anchorMeta.left-meta.left;
+  const dy=anchorMeta.top-meta.top;
+  const w=pcCanvas?pcCanvas.width:(meta?meta.width:0),h=pcCanvas?pcCanvas.height:(meta?meta.height:0);
+  const clamped=visiblePspriteOffset(anchor.left+dx,anchor.top+dy,w,h);
+  return{left:clamped.left,top:clamped.top,source:'doom-slade-flash-relative-'+anchorName,width:meta.width,height:meta.height,anchorFrame,anchorName,anchorLeft:anchor.left,anchorTop:anchor.top,dx,dy,wadLeft:meta.left,wadTop:meta.top,anchorWadLeft:anchorMeta.left,anchorWadTop:anchorMeta.top};
+}
+function pspriteFlashRelativeAnchoredOffset(lump,pcCanvas,rid,frame,rot,meta){
+  // Compatibility wrapper for older project/debug paths.  The current default
+  // calls pspriteDoomProjectedFlashOffset() directly.
+  return pspriteDoomProjectedFlashOffset(lump,pcCanvas,rid,frame,rot,meta);
+}
+function pspriteStockAnchoredOffset(lump,pcCanvas,rid,frame,rot,meta){
+  // Default mode treats WAD patch offsets like Doom/SLADE first-person psprite
+  // offsets.  Normal weapon frames are projected from the Doom 320x200 psprite
+  // top-left into the 3DO 160-line weapon view, then solved into DrawAWeapon
+  // record coordinates.  Muzzle flashes are different: ps_flash is attached to
+  // ps_weapon in the engine, so we project the active weapon frame first and
+  // apply the WAD-authored flash delta relative to that frame.
+  if(meta){
+    if(isWeaponFlashFrame(rid,frame,lump&&lump.name)){
+      const flash=pspriteDoomProjectedFlashOffset(lump,pcCanvas,rid,frame,rot,meta);
+      if(flash)return flash;
+    }
+    const exact=pspriteDoomProjectedOffset(lump,pcCanvas,rid,frame,rot,meta);
+    if(exact)return exact;
+  }
+  const stock=spriteStockPatchInfo(rid,frame,rot);if(!stock)return null;
+  const w=pcCanvas?pcCanvas.width:(meta?meta.width:stock.pcWidth),h=pcCanvas?pcCanvas.height:(meta?meta.height:stock.pcHeight);
+  return pspriteBaseStockAnchoredOffset(rid,frame,rot,w,h,meta);
+}
+function visiblePspriteOffset(left,top,w,h){
+  // 3DO psprites are placed by DrawAWeapon using record coordinates: x=ScreenXOffset+recordX*GunXScale and y=ScreenYOffset+2+(WeaponY-40+recordY)*GunYScale.  Keep at least a small portion of
+  // oversized Freedoom weapon frames visible rather than allowing raw negative
+  // WAD psprite offsets to push the gun completely below/right of the screen.
+  if(w>0){const minLeft=-160+8,maxLeft=160+w-8;left=Math.max(minLeft,Math.min(maxLeft,left));}
+  if(h>0){const minTop=64,maxTop=232+h-8;top=Math.max(minTop,Math.min(maxTop,top));}
+  return{left:Math.round(left),top:Math.round(top)};
+}
+function spriteImportOffsetOverrideFromLump(lump,pcCanvas,rid,frame=0,rot=null){
+  const mode=wadSpriteOffsetMode();
+  if(mode==='preserve')return null;
+  const meta=doomPatchInfo(lump&&lump.data);
+  if(mode==='raw-wad')return meta?{left:meta.left,top:meta.top,source:'raw-wad',width:meta.width,height:meta.height}:null;
+  if(mode==='wad'){
+    if(meta&&pcCanvas&&isFirstPersonWeaponSpriteRid(rid)&&rot===null){
+      const off=pspriteStockAnchoredOffset(lump,pcCanvas,rid,frame,rot,meta);
+      if(off)return off;
+    }
+    if(meta)return{left:meta.left,top:meta.top,source:'wad',width:meta.width,height:meta.height};
+    return null;
+  }
+  if(mode==='auto'){
+    if(!pcCanvas||isFirstPersonWeaponSpriteRid(rid))return null;
+    return{left:Math.round(pcCanvas.width/2),top:pcCanvas.height,source:'auto',width:pcCanvas.width,height:pcCanvas.height};
+  }
+  return null;
+}
 function rezAssetByRid(rid){return state.assets.find(a=>a.rid===rid)||null}
 function originalAssetBlobByRid(rid){const e=state.rezEntries.find(x=>x.resourceId===rid);return e?state.rez.slice(e.offset,e.offset+e.length):null}
 function updateAssetRawByRid(rid,b){for(const a of state.assets)if(a.rid===rid)a.raw=b}
@@ -1693,7 +2374,7 @@ function effectiveSpriteImportPcFlip(rid,rot,pcFlip=false){
   if(rot===5||rot===6||rot===7)return false;
   return !!pcFlip;
 }
-function encodeSpriteImportFromCanvas(rid,frame,rot,cn,pcFlip=false){
+function encodeSpriteImportFromCanvas(rid,frame,rot,cn,pcFlip=false,offsetOverride=null){
   const asset=rezAssetByRid(rid),orig=originalAssetBlobByRid(rid);if(!asset||!orig)throw Error(`missing sprite resource ${rid}`);
   const current=state.rezReplacements.get(rid)||asset.raw||orig,refs=spriteRefs(current);
   const ref=refs.find(r=>r.frame===frame&&((rot===null&&r.rot===null)||(rot!==null&&r.rot===rot)));
@@ -1706,7 +2387,7 @@ function encodeSpriteImportFromCanvas(rid,frame,rot,cn,pcFlip=false){
   // encodeSpritePatchRecordFromCanvas; do not use it to suppress this mirror.
   const finalPcFlip=effectiveSpriteImportPcFlip(rid,rot,pcFlip);
   const pcCanvas=finalPcFlip?flipCanvas(cn):cn;
-  const rec=encodeSpritePatchRecordFromCanvas(current,ref,pcCanvas,rid);
+  const rec=encodeSpritePatchRecordFromCanvas(current,ref,pcCanvas,rid,offsetOverride);
   const recs=new Map();recs.set(refKey(ref),rec);
   const rebuilt=rebuildSpriteResource(current,recs);
   state.rezReplacements.set(rid,rebuilt);updateAssetRawByRid(rid,rebuilt);
@@ -1721,12 +2402,37 @@ function encodeMiscImportFromCanvas(rid,shapeIndex,cn){
   const rebuilt=rebuildMiscResourceWithShape(current,shapeIndex,rec);
   state.rezReplacements.set(rid,rebuilt);updateAssetRawByRid(rid,rebuilt);
 }
+function wadMiscImportSpecs(name){
+  const key=String(name||'').toUpperCase();
+  let specs=(WAD_MISC_IMPORT[key]||[]).map(x=>x.slice?x.slice():[x[0],x[1]]);
+  if(freedoomUiFixesEnabled()){
+    // 3DO CHARSET has two A-Z banks.  Freedoom generally supplies uppercase STCFN065..090,
+    // but not a separate 26..51 bank, so mirror uppercase into the second bank too.
+    const m=/^STCFN0(6[5-9]|[78][0-9]|90)$/.exec(key);
+    if(m){const ch=parseInt(key.slice(5),10);specs.push([131,26+(ch-65)]);}
+    // The stock 3DO slider is a better format match than Freedoom's small M_THERMO pieces.
+    specs=specs.filter(sp=>sp[0]!==142);
+  }
+  return specs.length?specs:null;
+}
+function revertMiscResourceToStockRid(rid){
+  const e=state.rezEntries.find(x=>x.resourceId===rid);if(!e)return false;
+  state.rezReplacements.delete(rid);
+  updateAssetRawByRid(rid,state.rez.slice(e.offset,e.offset+e.length));
+  return true;
+}
+function applyFreedoomUiPostFixes(){
+  const notes=[];
+  if(!freedoomUiFixesEnabled())return notes;
+  if(revertMiscResourceToStockRid(142))notes.push('SLIDER preserved from stock 3DO resource; skipped/reverted Freedoom M_THERMO/M_THERMM.');
+  return notes;
+}
 function importWadDirectGraphics(){
   if(!state.wad)return{sprites:0,misc:0,skipped:[]};
   const pal=playpalPalette(),skipped=[];let sprites=0,misc=0;
   for(const l of state.wad.lumps){
     const name=l.name.toUpperCase();if(!l.size)continue;
-    const sm=resolveWadSpriteImportSpecs(name),mm=WAD_MISC_IMPORT[name];
+    const sm=resolveWadSpriteImportSpecs(name),mm=wadMiscImportSpecs(name);
     if((!sm||!sm.length)&&!mm)continue;
     let cn=null;
     if(sm&&sm.length)cn=decodeSpriteLumpCanvas(l,pal);
@@ -1735,7 +2441,8 @@ function importWadDirectGraphics(){
     if(sm)for(const spec of sm){
       try{
         const useCn=normalizeSpriteImportCanvas(name,spec[0],spec[2],cn);
-        encodeSpriteImportFromCanvas(spec[0],spec[1],spec[2],useCn,!!spec[3]);sprites++;
+        const off=spriteImportOffsetOverrideFromLump(l,useCn,spec[0],spec[1],spec[2]);
+        encodeSpriteImportFromCanvas(spec[0],spec[1],spec[2],useCn,!!spec[3],off);sprites++;
       }catch(e){skipped.push(`${name}->sprite ${spec[0]}: ${e.message}`)}
     }
     if(mm)for(const spec of mm){
@@ -1753,15 +2460,111 @@ function collectMapGraphics(maps){
   }
   return{walls:[...walls],flats:[...flats]};
 }
+function wadImportOption(id,def=true){const e=$(id);return e?!!e.checked:!!def}
+function wadImportOptions(){return{levels:wadImportOption('wadImportLevels',true),graphics:wadImportOption('wadImportGraphics',true),sfx:wadImportOption('wadImportSfx',true),music:wadImportOption('wadImportMusic',false)}}
+
+function wadMapLightMode(){const e=$('wadMapLightMode');return e?e.value:'auto'}
+function is32xImportedMap(map){return !!(map&&(map.raw32x||map.sourceEndian==='>'||map.embeddedOffset||(state.wad&&state.wad.embeddedOffset)))}
+function convertImportedMapLightFor3do(v,map,mode=wadMapLightMode()){
+  v=Math.max(0,Math.min(255,Number(v)||0));
+  if(mode==='literal')return v;
+  if(mode==='bright')return Math.min(240,Math.round(v*240/255));
+  const is32x=is32xImportedMap(map);
+  if(mode==='auto'&&!is32x)return v;
+  // 32X/ROM maps commonly use 192/255 as very bright values.  3DO Doom's renderer uses the
+  // sector light value directly as a 0..255 lighting-table index; 255 effectively becomes
+  // fullbright/no-falloff.  Scale imported console-map lights down into the useful 3DO range
+  // while preserving zero and relative darkness.
+  const scale=mode==='dark'?0.62:0.75;
+  return Math.max(0,Math.min(240,Math.round(v*scale)));
+}
+function normalizeImportedMapSectorLighting(map,mode=wadMapLightMode()){
+  const sec=map&&map.lumps&&map.lumps.SECTORS;if(!sec||sec.length<26)return{changed:0};
+  if(mode==='literal')return{changed:0,mode};
+  if(mode==='auto'&&!is32xImportedMap(map))return{changed:0,mode};
+  let min0=999,max0=-1,min1=999,max1=-1,changed=0;
+  const out=sec.slice();
+  for(let q=0;q+26<=out.length;q+=26){
+    const raw=u16le(out,q+20);min0=Math.min(min0,raw);max0=Math.max(max0,raw);
+    const lit=convertImportedMapLightFor3do(raw,map,mode);min1=Math.min(min1,lit);max1=Math.max(max1,lit);
+    if(lit!==raw){w16le(out,q+20,lit);changed++}
+  }
+  if(changed){map.lumps.SECTORS=out;map.lightNormalized={mode,changed,min0,max0,min1,max1};}
+  return{changed,mode,min0,max0,min1,max1};
+}
+function rezMapLightValueFor3do(v,mode='auto'){
+  v=Math.max(0,Math.min(255,Number(v)||0));
+  if(mode==='literal')return v;
+  if(mode==='bright')return Math.min(240,Math.round(v*240/255));
+  const scale=mode==='dark'?0.62:0.75;
+  return Math.max(0,Math.min(240,Math.round(v*scale)));
+}
+function normalizeRezSectorLightingFor3do(rezb,mode=wadMapLightMode(),force=false){
+  if(!rezb||rezb.length<4||mode==='literal')return{changed:0,mode};
+  const n=u32be(rezb,0),expected=4+n*28;if(!n||expected>rezb.length)return{changed:0,mode,skipped:true};
+  let min0=999,max0=-1,min1=999,max1=-1,changed=0;
+  for(let i=0;i<n;i++){const raw=u32be(rezb,4+i*28+16)&0xffff;min0=Math.min(min0,raw);max0=Math.max(max0,raw)}
+  // Only auto-repair maps that still look like the old 32X/ROM literal-light import.
+  // 3DO Doom uses sector light directly as the lighting-table index, and values at/near
+  // 255 behave as fullbright/no-falloff.  Explicit dark/bright modes intentionally re-scale all maps.
+  const suspicious=(max0>=224);
+  const should=(mode==='dark'||mode==='bright'||force||suspicious);
+  if(!should)return{changed:0,mode,min0,max0,min1:min0,max1:max0,skipped:true};
+  const out=rezb.slice();
+  for(let i=0;i<n;i++){
+    const off=4+i*28+16,raw=u32be(out,off)&0xffff,lit=rezMapLightValueFor3do(raw,mode);
+    min1=Math.min(min1,lit);max1=Math.max(max1,lit);
+    if(lit!==raw){w32be(out,off,lit);changed++}
+  }
+  return{out,changed,mode,min0,max0,min1,max1,forced:force,suspicious};
+}
+function countWadMusicLumps(){
+  if(!state.wad)return 0;
+  let n=0;
+  for(const l of state.wad.lumps){
+    const name=String(l.name||'').toUpperCase(),d=l.data||new Uint8Array(0);
+    if(/^D_/.test(name)||name==='GENMIDI'||name==='DMXGUS'||(d.length>=4&&(ascii(d,0,4)==='MThd'||ascii(d,0,4)==='MUS\x1a')))n++;
+  }
+  return n;
+}
+function reportUnsupportedWadMusic(label='WAD'){
+  const n=countWadMusicLumps();
+  if(n)log(`${label} music import requested, but MIDI/MUS conversion is not implemented; skipped ${n} music/control lump(s).`);
+  else log(`${label} music import requested; no Doom MIDI/MUS music lumps were detected.`);
+  return{musicSkipped:n,warnings:n?[`${label}: skipped ${n} MIDI/MUS music lump(s); converter not implemented`]:[]};
+}
+function importWadExistingSlotGraphics(textures,pal){
+  const warnings=[],wallNames=new Set(),flatNames=new Set();let walls=0,flats=0;
+  for(const name of WALL_NAMES){
+    let cn=null;
+    try{cn=renderWadTextureCanvas(name,textures,pal)}catch(e){cn=null}
+    if(!cn)continue;
+    const idx=WALL_NAMES.indexOf(name),rid=R_TEXT_FIRST+idx,e=state.rezEntries.find(x=>x.resourceId===rid),asset=state.assets.find(x=>x.rid===rid);
+    if(!e||!asset){warnings.push(`wall ${name}: no 3DO resource slot`);continue}
+    try{const b=encodeWallFromCanvas(asset,cn);state.rezReplacements.set(rid,b);asset.raw=b;walls++;wallNames.add(name)}
+    catch(err){warnings.push(`wall ${name}: ${err.message}`)}
+  }
+  for(const name of FLAT_NAMES){
+    let cn=null;
+    try{cn=renderWadFlatCanvas(name,pal)}catch(e){cn=null}
+    if(!cn)continue;
+    const idx=FLAT_NAMES.indexOf(name),rid=R_FLAT_FIRST+idx,e=state.rezEntries.find(x=>x.resourceId===rid),asset=state.assets.find(x=>x.rid===rid);
+    if(!e||!asset){warnings.push(`flat ${name}: no 3DO resource slot`);continue}
+    try{const b=encodeFlatFromCanvas(asset,cn);state.rezReplacements.set(rid,b);asset.raw=b;flats++;flatNames.add(name)}
+    catch(err){warnings.push(`flat ${name}: ${err.message}`)}
+  }
+  return{walls,flats,wallNames,flatNames,warnings};
+}
 function processWad(){
   if(!state.wad)return log('Load a WAD/IWAD first.');
   if(!state.rezEntries.length)return log('Load a Doom 3DO ISO/REZ first.');
+  const opt=wadImportOptions();
   state.wadMaps=state.wad.maps;populateMaps();
-  const importGraphics=$('wadImportGraphics')?$('wadImportGraphics').checked:true;
-  const direct=importGraphics?importWadDirectGraphics():{sprites:0,misc:0,skipped:[]};
+  const direct=opt.graphics?importWadDirectGraphics():{sprites:0,misc:0,skipped:[]};
   const used=collectMapGraphics(state.wadMaps),pal=playpalPalette(),textures=parseTextures();
-  const wallRemap=new Map(),flatRemap=new Map();let wallSlots=0,flatSlots=0,graphicsImported=direct.sprites+direct.misc;
-  if(importGraphics){
+  const slotGraphics=opt.graphics?importWadExistingSlotGraphics(textures,pal):{walls:0,flats:0,wallNames:new Set(),flatNames:new Set(),warnings:[]};
+  const wallRemap=new Map(),flatRemap=new Map();let wallSlots=0,flatSlots=0,graphicsImported=direct.sprites+direct.misc+slotGraphics.walls+slotGraphics.flats;
+  if(opt.graphics){
     const exactWalls=new Set(used.walls.filter(n=>WALL_NAMES.includes(n)));
     const exactFlats=new Set(used.flats.filter(n=>FLAT_NAMES.includes(n)));
     const freeWalls=WALL_NAMES.filter(n=>!exactWalls.has(n));
@@ -1776,8 +2579,8 @@ function processWad(){
       if(cn&&idx>=0&&e&&asset){state.rezReplacements.set(rid,encodeFlatFromCanvas(asset,cn));asset.raw=state.rezReplacements.get(rid);graphicsImported++;return true}
       return false;
     };
-    for(const n of used.walls)if(WALL_NAMES.includes(n)){wallRemap.set(n,n);importWall(n,n)}
-    for(const n of used.flats)if(FLAT_NAMES.includes(n)){flatRemap.set(n,n);importFlat(n,n)}
+    for(const n of used.walls)if(WALL_NAMES.includes(n)){wallRemap.set(n,n);if(!slotGraphics.wallNames.has(n))importWall(n,n)}
+    for(const n of used.flats)if(FLAT_NAMES.includes(n)){flatRemap.set(n,n);if(!slotGraphics.flatNames.has(n))importFlat(n,n)}
     for(const n of used.walls)if(!WALL_NAMES.includes(n)){
       const target=freeWalls[wallSlots++%Math.max(1,freeWalls.length)];wallRemap.set(n,target);if(target)importWall(n,target)
     }
@@ -1786,23 +2589,307 @@ function processWad(){
     }
   }
   let mapsDone=0,lumpsDone=0,warnings=[];
-  for(const rawMap of state.wadMaps){
-    const map=sanitizeImportedMap(rawMap);if(map.raw32x)warnings.push(`${map.name}: imported 32X/raw console map payloads`);if(map.generatedNode)warnings.push(`${map.name}: generated a single fallback BSP node because NODES was empty`);
-    const mapnum=wadMapNumber(map.name);if(!mapnum){warnings.push(`skip ${map.name}: no 3DO MAP slot`);continue}
+  if(opt.levels){
+    for(const rawMap of state.wadMaps){
+      const map=sanitizeImportedMap(rawMap);const lightFix=normalizeImportedMapSectorLighting(map);if(map.raw32x)warnings.push(`${map.name}: imported 32X/raw console map payloads`);if(lightFix.changed)warnings.push(`${map.name}: normalized sector lights for 3DO (${lightFix.mode}; ${lightFix.min0}-${lightFix.max0} -> ${lightFix.min1}-${lightFix.max1}, sectors changed=${lightFix.changed})`);if(map.generatedNode)warnings.push(`${map.name}: generated a single fallback BSP node because NODES was empty`);
+      const mapnum=wadMapNumber(map.name);if(!mapnum){warnings.push(`skip ${map.name}: no 3DO MAP slot`);continue}
+      for(const lump of MAP_LUMPS_REZ){
+        const b=map.lumps[lump];if(!b)continue;
+        try{
+          const rid=R_MAP_FIRST+(mapnum-1)*10+MAP_LUMPS_REZ.indexOf(lump),rezb=classicMapLumpToRez(lump,b,wallRemap,flatRemap);
+          state.rezReplacements.set(rid,rezb);lumpsDone++;
+        }catch(e){warnings.push(`${map.name}/${lump}: ${e.message}`)}
+      }
+      mapsDone++;
+    }
+  }
+  const sfx=opt.sfx?applyWadSfxFromDoomSoundLumps('wad sfx'):{sfx:0,warnings:[]};
+  const uiNotes=opt.graphics?applyFreedoomUiPostFixes():[];
+  const music=opt.music?reportUnsupportedWadMusic('WAD'):{musicSkipped:0,warnings:[]};
+  buildAssets();refreshAssets();populateMaps();renderAudioList();
+  log(`Processed WAD: options levels=${opt.levels?'on':'off'}, graphics=${opt.graphics?'on':'off'}, sfx=${opt.sfx?'on':'off'}, music=${opt.music?'report':'off'}, spriteOffsets=${wadSpriteOffsetMode()}, mapLighting=${wadMapLightMode()}; maps=${mapsDone}, map lumps=${lumpsDone}, graphics imported=${graphicsImported} (slot walls=${slotGraphics.walls}, slot flats=${slotGraphics.flats}, sprites=${direct.sprites}, fixed=${direct.misc}), sfx=${sfx.sfx}, pending REZ replacements=${state.rezReplacements.size}, root replacements=${state.replacements.size}`);
+  const allWarnings=warnings.concat(slotGraphics.warnings||[],direct.skipped||[],uiNotes||[],sfx.warnings||[],music.warnings||[]);
+  if(allWarnings.length)log(`WAD process warnings:\n${allWarnings.slice(0,80).join('\n')}${allWarnings.length>80?'\n...':''}`);
+}
+
+const FREEDOOM_3DO_SFX_ORDER=['pistol','shotgn','sgcock','plasma','bfg','sawup','sawidl','sawful','sawhit','rlaunc','rfly','rxplod','firsht','firbal','firxpl','pstart','pstop','doropn','dorcls','stnmov','swtchn','swtchx','plpain','dmpain','popain','slop','itemup','wpnup','oof','telept','posit1','posit2','posit3','bgsit1','bgsit2','sgtsit','cacsit','brssit','cybsit','spisit','sklatk','sgtatk','claw','pldeth','podth1','podth2','podth3','bgdth1','bgdth2','sgtdth','cacdth','skldth','brsdth','cybdth','spidth','posact','bgact','dmact','noway','barexp','punch','hoof','metal','itmbk'];
+const FREEDOOM_SFX_ALIAS={firbal:'firsht',rfly:'rlaunc'};
+const THREE_DO_SFX_RATE=8000,THREE_DO_SFX_CHANNELS=1;
+function setFreedoomStatus(m){const e=$('freedoomStatus');if(e)e.textContent=m;log(m)}
+function doomSoundLumpToAiff(data){
+  const d=new Uint8Array(data||[]);if(!d.length)throw Error('empty Doom sound lump');
+  let rate=11025,payload=d;
+  if(d.length>=8){
+    const fmt=u16le(d,0),r=u16le(d,2),decl=u32le(d,4),avail=d.length-8;
+    if(fmt<=5&&r>=1000&&r<=96000&&avail>0){
+      rate=r;const n=decl>0&&decl<=avail?decl:avail;payload=d.slice(8,8+n);
+    }
+  }
+  let pcm=new Int16Array(payload.length);
+  for(let i=0;i<payload.length;i++)pcm[i]=((payload[i]&255)-128)<<8;
+  // Doom/Freedoom DS* lumps may be 11025/22050 Hz or other rates. 3DO Doom
+  // sound effects/voice samples are expected as 8 kHz mono AIFF, so actually
+  // resample the PCM instead of only changing the AIFF COMM rate.
+  if(Math.round(rate)!==THREE_DO_SFX_RATE)pcm=resamplePcmLinear(pcm,rate,THREE_DO_SFX_RATE,1);
+  return makeSfxAiffFromPcm(pcm,THREE_DO_SFX_RATE,THREE_DO_SFX_CHANNELS);
+}
+function freedoomSfxShortFromPath(path,indexFallback=-1){
+  let b=baseName(path).replace(/\.[^.]+$/,'').toLowerCase();
+  let m=/^sound\s*0*([0-9]+)$/i.exec(b)||/^sound0*([0-9]+)$/i.exec(b);
+  if(m){const idx=parseInt(m[1],10)-1;if(idx>=0&&idx<FREEDOOM_3DO_SFX_ORDER.length)return FREEDOOM_3DO_SFX_ORDER[idx]}
+  if(indexFallback>=0&&/^sound$/i.test(b)&&indexFallback<FREEDOOM_3DO_SFX_ORDER.length)return FREEDOOM_3DO_SFX_ORDER[indexFallback];
+  b=b.replace(/^ds/,'').replace(/^sfx[_-]?/,'');
+  return b;
+}
+function freedoomFindDoomSoundLump(shortName){
+  const src=String(shortName||'').toLowerCase(),mapped=FREEDOOM_SFX_ALIAS[src]||src;
+  const names=[`DS${mapped.toUpperCase()}`,`DS${src.toUpperCase()}`];
+  for(const n of names){const l=wadFirst(n);if(l&&l.data&&l.data.length)return{lump:l,used:n}}
+  return null;
+}
+function applyWadSfxFromDoomSoundLumps(label='wad sfx'){
+  const entries=audioRootEntries('sfx'),warnings=[];let done=0;
+  entries.forEach((e,i)=>{
+    const path=e.path||e.name,short=freedoomSfxShortFromPath(path,i),hit=freedoomFindDoomSoundLump(short);
+    if(!hit){warnings.push(`${path}: no DS${short.toUpperCase()} lump`);return}
+    try{queue(path,doomSoundLumpToAiff(hit.lump.data),`${label} ${hit.used}`);done++}
+    catch(err){warnings.push(`${path}/${hit.used}: ${err.message}`)}
+  });
+  return{sfx:done,warnings};
+}
+function applyFreedoomSfxFromWad(){return applyWadSfxFromDoomSoundLumps('freedoom sfx')}
+const FREEDOOM_WALL_ALIASES={
+  BRICK01:['BRICK1','STONE2','STONE3','BROWN1','BROWN96'],
+  BRICK02:['BRICK2','STONE3','STONE4','BROWNGRN','BROWN144'],
+  BRICK03:['BRICK3','STONE5','STONE6','BROWN1'],
+  DFACE01:['MARBFAC3','MARBFAC2','MARBFACE','GSTGARG','GSTSATYR','SP_DUDE4'],
+  MARBLE01:['MARBLE1','MARBLE2','MARBFAC2','MARBFAC3'],
+  MARBLE02:['MARBLE2','MARBLE3','MARBFAC3','MARBGRAY'],
+  MARBLE03:['MARBLE3','MARBLE1','MARBGRAY','MARBFAC2'],
+  MARBLE04:['MARBGRAY','MARBLE1','MARBLE2','MARBLE3'],
+  WOOD01:['WOOD1','WOOD3','WOOD5','WOODGARG','WOODMET1'],
+  ASH01:['ASHWALL','ASHWALL2','ASHWALL3','ASHWALL4','ASHWALL6'],
+  CEMENT01:['CEMENT1','CEMENT2','CEMENT3','CEMENT9','GRAY5'],
+  CBLUE01:['COMPBLUE','TEKWALL1','COMPSPAN','COMPTALL'],
+  TECH01:['TEKWALL1','TEKWALL4','COMPSTA1','COMPSPAN','COMPTALL'],
+  TECH02:['TEKWALL2','TEKWALL5','COMPTALL','COMPSPAN','COMPBLUE'],
+  TECH03:['TEKWALL3','TEKWALL4','COMPBLUE','COMPSPAN'],
+  TECH04:['TEKWALL4','TEKWALL1','COMPWERD','COMPTALL','COMPSPAN'],
+  SKIN01:['SKIN2','SKINMET1','SKINFACE','SKINEDGE'],
+  SKIN02:['SKINSCAB','SKINLOW','SKINMET2','SKINEDGE'],
+  SKIN03:['SKINTEK1','SKINTEK2','SKINEDGE','SKINFACE'],
+  SKULLS01:['SKULWALL','SKSNAKE1','SKSNAKE2','GSTSATYR'],
+  STWAR01:['STARG1','STARG2','STARG3','STARGR1'],
+  STWAR02:['STARG3','STARG1','STARBR2','STARGR2'],
+  COMTAL02:['COMPTALL','COMPSPAN','COMPBLUE','COMPTAL2'],
+  COMTALL02:['COMPTALL','COMTAL02','COMPSPAN','COMPBLUE'],
+  SW1STAR:['SW1STARG','SW1STON1','SW1BRCOM','SW1STAR'],
+  SW2STAR:['SW2STARG','SW2STON1','SW2BRCOM','SW2STAR']
+};
+const FREEDOOM_FLAT_ALIASES={
+  GRASS:['GRASS1','GRASS2','RROCK13','FLAT5_1','FLOOR4_8','FLOOR5_4','MFLR8_1'],
+  // ROCKS is handled by freedoomRocksCandidates(). Freedoom IWADs may contain
+  // RROCK/ROCKS material that reads as lava in 3DO's small flat slot, so the
+  // default mode now prefers neutral stone candidates and rejects lava-like hits.
+  ROCKS:['FLOOR7_1','FLAT5_2','MFLR8_4','FLOOR6_2','FLAT5_4','RROCK13','RROCK14','RROCK15','RROCK16','RROCK17','RROCK18','RROCK19']
+};
+const FREEDOOM_ROCKS_CANDIDATES={
+  safe:['FLOOR7_1','FLAT5_2','MFLR8_4','FLOOR6_2','FLAT5_4','RROCK13','RROCK14','RROCK15','RROCK16','RROCK17','RROCK18','RROCK19','STONE','ROCKS'],
+  gray:['FLOOR7_1','FLAT5_4','MFLR8_4','FLOOR6_1','FLOOR6_2','FLAT5_2','RROCK17','RROCK18','RROCK19'],
+  brown:['FLAT5_2','FLOOR6_2','FLOOR7_1','MFLR8_4','RROCK13','RROCK14','RROCK15','RROCK16'],
+  green:['RROCK13','RROCK14','GRASS1','GRASS2','FLOOR4_8','FLOOR5_4','MFLR8_1','FLAT5_2'],
+  iwad:['ROCKS','FLOOR7_1','FLAT5_2','MFLR8_4','RROCK13','RROCK14','RROCK15','RROCK16','RROCK17','RROCK18','RROCK19'],
+  legacy:['ROCKS','RROCK01','RROCK02','RROCK03','RROCK04','FLAT5_2','FLOOR7_1','MFLR8_4'],
+  skip:[]
+};
+function freedoomRocksMode(){const e=$('freedoomRocksMode');return e&&e.value?e.value:'safe'}
+function freedoomRocksCandidates(){
+  const mode=freedoomRocksMode();
+  const arr=FREEDOOM_ROCKS_CANDIDATES[mode]||FREEDOOM_ROCKS_CANDIDATES.safe;
+  const out=[],seen=new Set();
+  for(const n of arr){const u=String(n||'').toUpperCase();if(u&&!seen.has(u)){seen.add(u);out.push(u)}}
+  return out;
+}
+function canvasLooksLikeLava(cn){
+  if(!cn)return false;
+  try{
+    const ctx=cn.getContext('2d'),w=cn.width,h=cn.height,d=ctx.getImageData(0,0,w,h).data;
+    let total=0,lava=0,hot=0;
+    for(let i=0;i<d.length;i+=4){
+      if(d[i+3]<16)continue;
+      const r=d[i],g=d[i+1],b=d[i+2];total++;
+      if(r>118&&g>22&&g<150&&b<92&&r>g*1.18&&r>b*1.65)lava++;
+      if(r>180&&g>70&&g<180&&b<95&&r>g*1.05&&g>b*1.15)hot++;
+    }
+    if(!total)return false;
+    return lava/total>0.16||hot/total>0.20;
+  }catch(e){return false}
+}
+function freedoomCandidateNames(name,aliases){
+  const src=String(name||'').toUpperCase(),out=[],seen=new Set();
+  const add=n=>{n=String(n||'').toUpperCase();if(n&&!seen.has(n)){seen.add(n);out.push(n)}};
+  add(src);
+  if(src==='COMTALL02')add('COMTAL02');
+  if(src==='COMTAL02')add('COMTALL02');
+  const m=/^([A-Z]+)0([1-9])$/.exec(src);if(m)add(m[1]+m[2]);
+  const m2=/^([A-Z]+)([0-9]{2})$/.exec(src);if(m2)add(m2[1]+String(parseInt(m2[2],10)));
+  for(const n of aliases[src]||[])add(n);
+  return out;
+}
+function renderFreedoomWallCandidate(name,textures,pal,warnings){
+  for(const cand of freedoomCandidateNames(name,FREEDOOM_WALL_ALIASES)){
+    const cn=renderWadTextureCanvas(cand,textures,pal);
+    if(cn){if(cand!==name)warnings.push(`wall ${name}: using Freedoom/Doom alias ${cand}`);return cn}
+  }
+  return null;
+}
+function renderFreedoomFlatCandidate(name,textures,pal,warnings){
+  const src=String(name||'').toUpperCase();
+  const isRocks=src==='ROCKS';
+  const cands=isRocks?freedoomRocksCandidates():freedoomCandidateNames(name,FREEDOOM_FLAT_ALIASES);
+  if(isRocks&&freedoomRocksMode()==='skip'){
+    warnings.push('flat ROCKS: skipped by Freedoom ROCKS selector');
+    return null;
+  }
+  const avoidLava=isRocks&&!['legacy','iwad'].includes(freedoomRocksMode());
+  let lavaFallback=null,lavaFallbackName='';
+  for(const cand of cands){
+    let cn=renderWadFlatCanvas(cand,pal);
+    if(!cn){const tex=renderWadTextureCanvas(cand,textures,pal);if(tex)cn=imageCanvasResize(tex,64,64)}
+    if(!cn)continue;
+    if(avoidLava&&canvasLooksLikeLava(cn)){
+      if(!lavaFallback){lavaFallback=cn;lavaFallbackName=cand}
+      warnings.push(`flat ROCKS: skipped ${cand} because it looks lava/red; change the ROCKS selector to legacy/IWAD if this is desired`);
+      continue;
+    }
+    if(cand!==name)warnings.push(`flat ${name}: using Freedoom/Doom alias ${cand}${isRocks?` (${freedoomRocksMode()} mode)`:''}`);
+    return cn;
+  }
+  if(isRocks&&lavaFallback){
+    warnings.push(`flat ROCKS: all selected candidates looked lava/red; using first available ${lavaFallbackName} anyway`);
+    return lavaFallback;
+  }
+  return null;
+}
+function applyFreedoomWallsFlats(){
+  const pal=playpalPalette(),textures=parseTextures(),warnings=[];let walls=0,flats=0;
+  for(let i=0;i<WALL_NAMES.length;i++){
+    const name=WALL_NAMES[i],rid=R_TEXT_FIRST+i,asset=rezAssetByRid(rid);
+    if(!asset)continue;
+    try{const cn=renderFreedoomWallCandidate(name,textures,pal,warnings);if(!cn)continue;const b=encodeWallFromCanvas(asset,cn);state.rezReplacements.set(rid,b);asset.raw=b;walls++}
+    catch(e){warnings.push(`wall ${name}: ${e.message}`)}
+  }
+  for(let i=0;i<FLAT_NAMES.length;i++){
+    const name=FLAT_NAMES[i],rid=R_FLAT_FIRST+i,asset=rezAssetByRid(rid);
+    if(!asset)continue;
+    try{const cn=renderFreedoomFlatCandidate(name,textures,pal,warnings);if(!cn)continue;const b=encodeFlatFromCanvas(asset,cn);state.rezReplacements.set(rid,b);asset.raw=b;flats++}
+    catch(e){warnings.push(`flat ${name}: ${e.message}`)}
+  }
+  return{walls,flats,warnings};
+}
+const FREEDOOM_EXTRA_SPRITE_ALIASES=[
+  {target:'OURHEROBDY',frames:[{frame:0,rot:null,lumps:['PLAYN0','PLAYM0','PLAYL0','PLAYA0']},{frame:1,rot:null,lumps:['PLAYO0','PLAYP0','PLAYQ0','PLAYB0']}]},
+  {target:'BODYPOLE',frames:[{frame:0,rot:null,lumps:['POL1A0','POL2A0','GOR1A0']}]},
+  {target:'FIVESKULLPOLE',frames:[{frame:0,rot:null,lumps:['POL4A0','POL3A0','POL2A0']}]},
+  {target:'TALLSKULLPOLE',frames:[{frame:0,rot:null,lumps:['POL3A0','POL2A0','POL4A0']}]},
+  {target:'SHORTGREENPILLAR',frames:[{frame:0,rot:null,lumps:['COL1A0','COL2A0','SMT2A0','ELECA0']}]},
+  {target:'SHORTREDPILLAR',frames:[{frame:0,rot:null,lumps:['COL2A0','COL1A0','SMITA0','ELECA0']}]},
+  {target:'FLAMINGSKULLS',frames:[
+    {frame:0,rot:null,lumps:['FSKUA0','FSKUA1','FSKUA2A8']},
+    {frame:1,rot:null,lumps:['FSKUB0','FSKUB1','FSKUB2B8']},
+    {frame:2,rot:null,lumps:['FSKUC0','FSKUC1','FSKUC2C8']}
+  ]},
+  {target:'MEDDEADTREE',frames:[{frame:0,rot:null,lumps:['TRE1A0','TRE2A0']}]},
+  {target:'LARGESTAL',frames:[{frame:0,rot:null,lumps:['SMITA0','SMT2A0','COL6A0']}]},
+  {target:'SMALLSTAL',frames:[{frame:0,rot:null,lumps:['SMT2A0','SMITA0','COL6A0']}]},
+  {target:'HANGINGRUMP',frames:[{frame:0,rot:null,lumps:['HDB1A0','HDB2A0','HDB3A0','HDB4A0','HDB5A0','HDB6A0','GOR1A0']}]},
+  {target:'REDTORCH',frames:[
+    {frame:0,rot:null,lumps:['TREDA0','REDTA0']},{frame:1,rot:null,lumps:['TREDB0','REDTB0']},
+    {frame:2,rot:null,lumps:['TREDC0','REDTC0']},{frame:3,rot:null,lumps:['TREDD0','REDTD0']}
+  ]},
+  {target:'BLUETORCH',frames:[
+    {frame:0,rot:null,lumps:['TBLUA0','BLUEA0']},{frame:1,rot:null,lumps:['TBLUB0','BLUEB0']},
+    {frame:2,rot:null,lumps:['TBLUC0','BLUEC0']},{frame:3,rot:null,lumps:['TBLUD0','BLUED0']}
+  ]},
+  {target:'GREENTORCH',frames:[
+    {frame:0,rot:null,lumps:['TGRNA0','GREEA0']},{frame:1,rot:null,lumps:['TGRNB0','GREEB0']},
+    {frame:2,rot:null,lumps:['TGRNC0','GREEC0']},{frame:3,rot:null,lumps:['TGRND0','GREED0']}
+  ]},
+  {target:'INVULNERABILITY',frames:[
+    {frame:0,rot:null,lumps:['PINVA0','INVUA0']},{frame:1,rot:null,lumps:['PINVB0','INVUB0']},
+    {frame:2,rot:null,lumps:['PINVC0','INVUC0']},{frame:3,rot:null,lumps:['PINVD0','INVUD0']}
+  ]},
+  {target:'PLSS',frames:[{frame:0,rot:null,lumps:['PLSSA0','PLASA0']},{frame:1,rot:null,lumps:['PLSSB0','PLASB0','PLSSA0']}]},
+  {target:'PLSE',frames:[
+    {frame:0,rot:null,lumps:['PLSEA0','PLSEA1']},{frame:1,rot:null,lumps:['PLSEB0','PLSEB1']},
+    {frame:2,rot:null,lumps:['PLSEC0','PLSEC1']},{frame:3,rot:null,lumps:['PLSED0','PLSED1']},
+    {frame:4,rot:null,lumps:['PLSEE0','PLSEE1']}
+  ]}
+];
+function spriteRidByResourceName(name){const i=SPRITE_NAMES.indexOf(String(name||'').toUpperCase());return i>=0?R_SPRITE_FIRST+i:null}
+function firstExistingWadLump(names){for(const n of names||[]){const l=wadFirst(n);if(l&&l.data&&l.data.length)return{lump:l,name:String(n).toUpperCase()}}return null}
+function applyFreedoomExtraSpriteAliases(){
+  const pal=playpalPalette(),warnings=[];let sprites=0;
+  for(const spec of FREEDOOM_EXTRA_SPRITE_ALIASES){
+    const rid=spriteRidByResourceName(spec.target);
+    if(!rid||!rezAssetByRid(rid)){warnings.push(`sprite ${spec.target}: no 3DO resource`);continue}
+    for(const fr of spec.frames||[]){
+      const hit=firstExistingWadLump(fr.lumps);
+      if(!hit){warnings.push(`sprite ${spec.target} frame ${fr.frame}: no Freedoom alias lump from ${fr.lumps.join(', ')}`);continue}
+      let cn=null;try{cn=decodeSpriteLumpCanvas(hit.lump,pal)}catch(e){cn=null}
+      if(!cn){warnings.push(`sprite ${spec.target} frame ${fr.frame}/${hit.name}: not a supported patch sprite`);continue}
+      try{
+        const frot=fr.rot===undefined?null:fr.rot;
+        const off=spriteImportOffsetOverrideFromLump(hit.lump,cn,rid,fr.frame,frot);
+        encodeSpriteImportFromCanvas(rid,fr.frame,frot,cn,!!fr.flip,off);sprites++
+      }
+      catch(e){warnings.push(`sprite ${spec.target} frame ${fr.frame}/${hit.name}: ${e.message}`)}
+    }
+  }
+  return{sprites,warnings};
+}
+
+function applyFreedoomMapsNoRemap(){
+  let maps=0,lumps=0;const warnings=[];
+  for(const rawMap of state.wadMaps||[]){
+    const map=sanitizeImportedMap(rawMap);const lightFix=normalizeImportedMapSectorLighting(map);if(lightFix.changed)warnings.push(`${map.name}: normalized sector lights for 3DO (${lightFix.mode}; ${lightFix.min0}-${lightFix.max0} -> ${lightFix.min1}-${lightFix.max1}, sectors changed=${lightFix.changed})`);const mapnum=wadMapNumber(map.name);
+    if(!mapnum){warnings.push(`skip ${map.name}: no 3DO MAP slot`);continue}
     for(const lump of MAP_LUMPS_REZ){
       const b=map.lumps[lump];if(!b)continue;
-      try{
-        const rid=R_MAP_FIRST+(mapnum-1)*10+MAP_LUMPS_REZ.indexOf(lump),rezb=classicMapLumpToRez(lump,b,wallRemap,flatRemap);
-        state.rezReplacements.set(rid,rezb);lumpsDone++;
-      }catch(e){warnings.push(`${map.name}/${lump}: ${e.message}`)}
+      try{const rid=R_MAP_FIRST+(mapnum-1)*10+MAP_LUMPS_REZ.indexOf(lump);if(!state.rezEntries.find(e=>e.resourceId===rid))continue;state.rezReplacements.set(rid,classicMapLumpToRez(lump,b,null,null));lumps++}
+      catch(e){warnings.push(`${map.name}/${lump}: ${e.message}`)}
     }
-    mapsDone++;
+    maps++;
   }
-  buildAssets();refreshAssets();populateMaps();
-  log(`Processed WAD: maps=${mapsDone}, map lumps=${lumpsDone}, graphics imported=${graphicsImported} (sprites=${direct.sprites}, fixed=${direct.misc}), pending REZ replacements=${state.rezReplacements.size}`);
-  const allWarnings=warnings.concat(direct.skipped||[]);
-  if(allWarnings.length)log(`WAD process warnings:\n${allWarnings.slice(0,40).join('\n')}${allWarnings.length>40?'\n...':''}`);
+  return{maps,lumps,warnings};
 }
+async function processFreedoomIwad(){
+  if(!state.wad)return setFreedoomStatus('Load Freedoom1.wad with the WAD/IWAD file picker first.');
+  if(!state.rezEntries.length)return setFreedoomStatus('Load a Doom 3DO ISO/REZ first.');
+  const opt=wadImportOptions();
+  state.wadMaps=state.wad.maps;populateMaps();
+  setFreedoomStatus(`Applying Freedoom IWAD pack with options: levels=${opt.levels?'on':'off'}, graphics=${opt.graphics?'on':'off'}, sfx=${opt.sfx?'on':'off'}, music=${opt.music?'report':'off'}, spriteOffsets=${wadSpriteOffsetMode()}, mapLighting=${wadMapLightMode()}...`);
+  await new Promise(r=>setTimeout(r,0));
+  const wf=opt.graphics?applyFreedoomWallsFlats():{walls:0,flats:0,warnings:[]};
+  await new Promise(r=>setTimeout(r,0));
+  const direct=opt.graphics?importWadDirectGraphics():{sprites:0,misc:0,skipped:[]};
+  await new Promise(r=>setTimeout(r,0));
+  const extra=opt.graphics?applyFreedoomExtraSpriteAliases():{sprites:0,warnings:[]};
+  await new Promise(r=>setTimeout(r,0));
+  const uiNotes=opt.graphics?applyFreedoomUiPostFixes():[];
+  await new Promise(r=>setTimeout(r,0));
+  const maps=opt.levels?applyFreedoomMapsNoRemap():{maps:0,lumps:0,warnings:[]};
+  await new Promise(r=>setTimeout(r,0));
+  const sfx=opt.sfx?applyFreedoomSfxFromWad():{sfx:0,warnings:[]};
+  const music=opt.music?reportUnsupportedWadMusic('Freedoom'):{musicSkipped:0,warnings:[]};
+  buildAssets();refreshAssets();populateMaps();renderAudioList();updateAudioQueues();
+  const msg=`Freedoom IWAD applied: walls=${wf.walls}, flats=${wf.flats}, sprites=${direct.sprites+extra.sprites} (${direct.sprites} direct + ${extra.sprites} alias), fixed=${direct.misc}, maps=${maps.maps}, map lumps=${maps.lumps}, sfx=${sfx.sfx}, music skipped=${music.musicSkipped}, spriteOffsets=${wadSpriteOffsetMode()}, mapLighting=${wadMapLightMode()}. Pending REZ replacements=${state.rezReplacements.size}, root replacements=${state.replacements.size}.`;
+  setFreedoomStatus(msg);
+  const warnings=[...wf.warnings,...(direct.skipped||[]),...extra.warnings,...uiNotes,...maps.warnings,...sfx.warnings,...music.warnings];
+  if(warnings.length)log(`Freedoom import warnings:\n${warnings.slice(0,80).join('\n')}${warnings.length>80?'\n...':''}`);
+}
+
+
 function counted(b,rec){const n=u32be(b,0);return[n,b.slice(4,4+n*rec)]}
 function texName(i){return i===0xffffffff||i>=WALL_NAMES.length?'-':WALL_NAMES[i]}
 function flatName(i){return i===0xffffffff||i>=FLAT_NAMES.length?'F_SKY1':FLAT_NAMES[i]}
@@ -1913,25 +3000,31 @@ function blazeFixNotice(msg){setBlazeFixStatus(msg);log(msg);try{const n=documen
 function applyBlazeFixAllRezMaps(){
   try{
     if(!state.rezEntries.length)throw Error('load a 3DO ISO/REZ first');
-    const totals={NUKAGE3:0,NUKAGE2:0,NUKAGE1:0},fieldTotals={slotA:0,slotB:0};let renderBitsCleared=0,legacyRenderBitsCleared=0;const changed=[];let checked=0;
+    const totals={NUKAGE3:0,NUKAGE2:0,NUKAGE1:0},fieldTotals={slotA:0,slotB:0};let renderBitsCleared=0,legacyRenderBitsCleared=0,lightSectorsChanged=0,lightMapsChanged=0;const changed=[];let checked=0;const lightDetails=[];
+    const doLighting=$('blazeFixLighting')?!!$('blazeFixLighting').checked:true,lightMode=wadMapLightMode();
     for(let num=1;num<=24;num++){
       const rid=R_MAP_FIRST+(num-1)*10+MAP_LUMPS_REZ.indexOf('SECTORS'),e=state.rezEntries.find(x=>x.resourceId===rid);if(!e)continue;
       checked++;
-      const rezb=state.rezReplacements.get(rid)||state.rez.slice(e.offset,e.offset+e.length);
-      const fixed=blazeFixedRezSectorLump(rezb);if(!fixed.total)continue;
-      state.rezReplacements.set(rid,fixed.out);updateAssetRawByRid(rid,fixed.out);
+      let rezb=state.rezReplacements.get(rid)||state.rez.slice(e.offset,e.offset+e.length),mapTouched=false;
+      const fixed=blazeFixedRezSectorLump(rezb);
+      if(fixed.total){rezb=fixed.out;mapTouched=true;for(const k of Object.keys(totals))totals[k]+=fixed.counts[k];fieldTotals.slotA+=fixed.fieldCounts.slotA;fieldTotals.slotB+=fixed.fieldCounts.slotB;renderBitsCleared+=fixed.renderBitsCleared||0;legacyRenderBitsCleared+=fixed.legacyRenderBitsCleared||0;}
+      if(doLighting){
+        const light=normalizeRezSectorLightingFor3do(rezb,lightMode,false);
+        if(light.changed){rezb=light.out;mapTouched=true;lightMapsChanged++;lightSectorsChanged+=light.changed;lightDetails.push(`MAP${String(num).padStart(2,'0')}: ${light.min0}-${light.max0}->${light.min1}-${light.max1} (${light.changed})`)}
+      }
+      if(!mapTouched)continue;
+      state.rezReplacements.set(rid,rezb);updateAssetRawByRid(rid,rezb);
       changed.push(`MAP${String(num).padStart(2,'0')}`);
-      for(const k of Object.keys(totals))totals[k]+=fixed.counts[k];
-      fieldTotals.slotA+=fixed.fieldCounts.slotA;fieldTotals.slotB+=fixed.fieldCounts.slotB;renderBitsCleared+=fixed.renderBitsCleared||0;legacyRenderBitsCleared+=fixed.legacyRenderBitsCleared||0;
     }
     if(state.map&&/^MAP\d\d$/.test(state.map.name)&&changed.includes(state.map.name)){
       const n=parseInt(state.map.name.slice(3),10);state.map.lumps={...state.map.lumps,SECTORS:convertMap(n,'SECTORS')};drawMap();
     }
     buildAssets();refreshAssets();populateMaps();
-    const total=totals.NUKAGE3+totals.NUKAGE2+totals.NUKAGE1+renderBitsCleared+legacyRenderBitsCleared;
+    const total=totals.NUKAGE3+totals.NUKAGE2+totals.NUKAGE1+renderBitsCleared+legacyRenderBitsCleared+lightSectorsChanged;
+    const lightMsg=doLighting?` Sector lighting repaired in ${lightMapsChanged} map(s), sectors changed x${lightSectorsChanged}${lightDetails.length?`: ${lightDetails.slice(0,8).join('; ')}${lightDetails.length>8?'; …':''}`:''}.`:' Sector lighting repair disabled.';
     const msg=total?`BLAZE FIX applied to ${changed.length} map(s): ${changed.join(', ')}.
 Sector flat slots changed: NUKAGE3→FLOOR6_2 x${totals.NUKAGE3}, NUKAGE2→GRASS x${totals.NUKAGE2}, NUKAGE1→CEIL5_1 x${totals.NUKAGE1}.
-Fields touched: slot A x${fieldTotals.slotA}, slot B x${fieldTotals.slotB}. Render-only sector bits cleared x${renderBitsCleared} plus legacy already-fixed sector bits x${legacyRenderBitsCleared}. Existing GRASS/CEIL5_1/FLOOR6_2 entries are left unchanged except for stale OptiDoom render bits.`:`BLAZE FIX checked ${checked} REZ map(s); no NUKAGE1/2/3 sector flat slots or stale Blaze render bits needed changes.`;
+Fields touched: slot A x${fieldTotals.slotA}, slot B x${fieldTotals.slotB}. Render-only sector bits cleared x${renderBitsCleared} plus legacy already-fixed sector bits x${legacyRenderBitsCleared}.${lightMsg} Existing GRASS/CEIL5_1/FLOOR6_2 entries are left unchanged except for stale OptiDoom render bits.`:`BLAZE FIX checked ${checked} REZ map(s); no NUKAGE1/2/3 sector flat slots, stale Blaze render bits, or suspicious old 32X sector light values needed changes.`;
     blazeFixNotice(msg);
   }catch(e){blazeFixNotice('BLAZE FIX failed: '+e.message)}
 }
@@ -2206,10 +3299,14 @@ function decodeAiffToPcmInfo(bytes){
   else throw Error(`unsupported AIFF/AIFC audio ${a.form} ${a.comp||'PCM'} ${a.bits} bits`);
   return{...a,pcm};
 }
-function makeSfxAiffFromPcm(pcm,rate,channels){
-  rate=Math.max(8000,Math.round(rate)||8000);channels=Math.max(1,Math.min(2,channels|0));
-  const frames=Math.floor(pcm.length/channels);
-  return makeAiff(pcm,rate,channels,frames,8);
+function makeSfxAiffFromPcm(pcm,rate,channels,targetRate=THREE_DO_SFX_RATE,targetChannels=THREE_DO_SFX_CHANNELS){
+  rate=Math.max(1,Math.round(rate)||targetRate);channels=Math.max(1,Math.min(2,channels|0));
+  targetRate=Math.max(1,Math.round(targetRate)||THREE_DO_SFX_RATE);targetChannels=Math.max(1,Math.min(2,targetChannels|0));
+  let out=pcm instanceof Int16Array?pcm:new Int16Array(pcm||[]),outRate=rate,outChannels=channels;
+  if(outRate!==targetRate){out=resamplePcmLinear(out,outRate,targetRate,outChannels);outRate=targetRate}
+  if(outChannels!==targetChannels){out=convertPcmChannels(out,outChannels,targetChannels);outChannels=targetChannels}
+  const frames=Math.floor(out.length/outChannels);
+  return makeAiff(out,outRate,outChannels,frames,8);
 }
 function normalizeAiffForSfx(bytes,targetRate,targetChannels){
   const info=decodeAiffToPcmInfo(bytes),rate=Math.max(8000,Math.round(targetRate)||8000),channels=Math.max(1,Math.min(2,targetChannels|0));
@@ -2218,7 +3315,7 @@ function normalizeAiffForSfx(bytes,targetRate,targetChannels){
   let pcm=info.pcm,srcRate=Math.round(info.rate)||rate,srcChannels=info.channels;
   if(srcRate!==rate){pcm=resamplePcmLinear(pcm,srcRate,rate,srcChannels);srcRate=rate}
   if(srcChannels!==channels){pcm=convertPcmChannels(pcm,srcChannels,channels);srcChannels=channels}
-  return makeSfxAiffFromPcm(pcm,rate,channels);
+  return makeSfxAiffFromPcm(pcm,rate,channels,rate,channels);
 }
 function resamplePcmLinear(pcm,srcRate,dstRate,channels){
   srcRate=Math.max(1,Math.round(srcRate)||44100);dstRate=Math.max(1,Math.round(dstRate)||srcRate);channels=Math.max(1,channels|0);
@@ -2268,7 +3365,7 @@ async function replaceRootAudioFromFile(e,file,playerId=null){
     bytes=makeSdx2Aifc(sdx2,pcm.rate,pcm.channels,pcm.frames);
   }else{
     const pcm=await audioToPcm(file,+$('sfxRate').value||8000,+$('sfxChannels').value||1);
-    bytes=makeSfxAiffFromPcm(pcm.pcm,pcm.rate,pcm.channels);
+    bytes=makeSfxAiffFromPcm(pcm.pcm,pcm.rate,pcm.channels,+$('sfxRate').value||8000,+$('sfxChannels').value||1);
   }
   queue(path,bytes,kind==='music'?'music replacement':'sfx replacement');
   renderAudioList();
@@ -2634,16 +3731,22 @@ function finalizeMode1Sector(d,o){w32le(d,o+0x810,cdEdc(d,o,0x810));for(let i=0x
 function isoToBin2352Mode1(iso,rep){const userSize=2048,rawSize=2352,sectors=Math.ceil(iso.length/userSize),out=new Uint8Array(sectors*rawSize),sync=new Uint8Array([0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00]);for(let i=0;i<sectors;i++){const o=i*rawSize,p=i*userSize,msf=lbaToMsf(i);out.set(sync,o);out[o+12]=msf[0];out[o+13]=msf[1];out[o+14]=msf[2];out[o+15]=1;out.set(iso.slice(p,Math.min(p+userSize,iso.length)),o+16);finalizeMode1Sector(out,o)}if(rep)rep.push(`wrapped ${sectors} 2048-byte sector(s) as BIN/CUE MODE1/2352 with generated EDC/ECC (${out.length} bytes)`);return out}
 function cueTextForBin(binName){return `FILE "${String(binName).replace(/"/g,'')}" BINARY\r\n  TRACK 01 MODE1/2352\r\n    INDEX 01 00:00:00\r\n`}
 function exportIso(){if(!state.iso)return;let out=new Uint8Array(state.iso),rep=[];if(state.rezReplacements&&state.rezReplacements.size){const mig=sanitizeSpriteRezReplacements(true);if(mig.resources)rep.push(`migrated ${mig.resources} sprite resource(s), ${mig.patches} patch(es), to clipped/far-render compatible CEL layout`);if(mig.errors&&mig.errors.length)rep.push('SPRITE MIGRATION WARNINGS: '+mig.errors.join(' | '));const mtf=sanitizeRezMapTextureOffsets(true);if(mtf.maps)rep.push(`normalized map texture offsets for ${mtf.maps} map(s): sidedef x=${mtf.sideX}, sidedef y=${mtf.sideY}, seg offset=${mtf.segOffset}`);const audit=auditRezConversion(true);if(audit.wallFixes)rep.push(`wall guard-tail fixups applied for ${audit.wallFixes} wall resource(s)`);try{const rz=buildRezFile();state.replacements.set('REZFILE',rz);rep.push(`rebuilt REZFILE with ${state.rezReplacements.size} changed resource(s): ${rz.length} bytes; export will force this REZFILE into the image even if it must be appended`)}catch(e){rep.push('REZ rebuild failed: '+e.message)}}for(const[n,b]of state.replacements){try{out=replaceRoot(out,n,b);rep.push(`replaced ${n}: ${b.length} bytes`)}catch(e){rep.push(`FAILED ${n}: ${e.message}`)}}if(hasOperaFsQueuedOps()){out=applyOperaFsQueuedOps(out,rep)}if(state.bannerReplacement){try{const br=applyBannerToIso(out,state.bannerReplacement);out=br.bytes;rep.push(br.report)}catch(e){rep.push('BANNER REPLACEMENT FAILED: '+e.message)}}return (async()=>{if($('signIso')&&$('signIso').checked){try{const signed=await sign3doIso(out);out=signed.bytes;rep.push(...signed.report);rep.push('3DOEncrypt-style signing applied in browser.')}catch(e){rep.push('SIGNING FAILED: '+e.message)}}else{rep.push('3DOEncrypt/signing: skipped. Check apply 3DOEncrypt signing to sign in-browser.')}const fmt=$('exportFormat')?$('exportFormat').value:'iso',base=exportBaseName();if(fmt==='bin2352'){const binName=base+'.patched.bin',cueName=base+'.patched.cue',bin=isoToBin2352Mode1(out,rep);rep.push(`wrote matching CUE as ${cueName}`);$('exportReport').textContent=rep.join('\n');download(binName,blob(bin));download(cueName,blob(strBytes(cueTextForBin(binName)),'text/plain'))}else{$('exportReport').textContent=rep.join('\n');download(base+'.patched.iso',blob(out))}})()}
-function projectLaunchMeFile(){const e=findLaunchMeEntry(),r=currentLaunchMeReplacement(e);return r?{name:r.key,bytes:[...r.bytes],custom:true}:null}
+function projectLaunchMeFile(){
+  const e=findLaunchMeEntry(),r=currentLaunchMeReplacement(e);
+  return r?{name:r.key,bytes:projectByteArray(r.bytes),custom:true}:null
+}
 function projectBannerFile(){
-  try{const b=state.bannerReplacement||($('bannerCanvas')?bannerBytes():null);return b?{name:'banner.banner',bytes:[...b],custom:!!state.bannerReplacement,queued:!!state.bannerReplacement}:null}catch(_){return null}
+  try{
+    const b=state.bannerReplacement||($('bannerCanvas')?bannerBytes():null);
+    return b?{name:'banner.banner',bytes:projectByteArray(b),custom:!!state.bannerReplacement,queued:!!state.bannerReplacement}:null
+  }catch(_){return null}
 }
 function saveProject(){
   const bannerFile=projectBannerFile(),launchMeFile=projectLaunchMeFile();
-  const p={version:5,
-    replacements:[...state.replacements].map(([n,b])=>[n,[...b]]),
-    rezReplacements:[...state.rezReplacements].map(([n,b])=>[n,[...b]]),
-    bannerReplacement:state.bannerReplacement?[...state.bannerReplacement]:null,
+  const p={version:6,binaryEncoding:'base64',
+    replacements:[...state.replacements].map(([n,b])=>[n,projectByteArray(b)]),
+    rezReplacements:[...state.rezReplacements].map(([n,b])=>[n,projectByteArray(b)]),
+    bannerReplacement:state.bannerReplacement?projectByteArray(state.bannerReplacement):null,
     bannerFile,
     launchMeFile,
     launchMeReplacement:launchMeFile,
@@ -2651,37 +3754,38 @@ function saveProject(){
     mapDeletedByMap:[...state.mapDeletedByMap].map(([k,s])=>[k,[...s]]),
     operaDeletes:[...state.operaDeletes],
     operaRenames:[...state.operaRenames],
-    operaNewFiles:[...state.operaNewFiles].map(([n,b])=>[n,[...b]])
+    operaNewFiles:[...state.operaNewFiles].map(([n,b])=>[n,projectByteArray(b)])
   };
   download('doom3do_webstudio_project.json',new Blob([JSON.stringify(p,null,2)],{type:'application/json'}))
 }
 async function loadProject(f){
   let txt=await f.text(),p;
   try{p=JSON.parse(txt)}catch(e){log(`Project load failed: ${f.name} is not a Web Studio project JSON. Use the PWAD/IWAD chooser for .wad files.`);return}
-  state.replacements=new Map((p.replacements||[]).map(([n,a])=>[n,new Uint8Array(a)]));
-  state.rezReplacements=new Map((p.rezReplacements||[]).map(([n,a])=>[Number(n),new Uint8Array(a)]));
+  state.replacements=new Map((p.replacements||[]).map(([n,a])=>[n,projectBytesFromJson(a)]));
+  state.rezReplacements=new Map((p.rezReplacements||[]).map(([n,a])=>[Number(n),projectBytesFromJson(a)]));
   const spriteMig=sanitizeSpriteRezReplacements(true);
   const bannerObj=p.bannerFile||null;
-  const bannerBytesFromProject=p.bannerReplacement?new Uint8Array(p.bannerReplacement):(bannerObj&&bannerObj.bytes?new Uint8Array(bannerObj.bytes):null);
-  state.bannerReplacement=p.bannerReplacement?new Uint8Array(p.bannerReplacement):(bannerObj&&bannerObj.queued&&bannerObj.bytes?new Uint8Array(bannerObj.bytes):null);
+  const bannerBytesFromProject=p.bannerReplacement?projectBytesFromJson(p.bannerReplacement):(bannerObj&&bannerObj.bytes?projectBytesFromJson(bannerObj.bytes):null);
+  state.bannerReplacement=p.bannerReplacement?projectBytesFromJson(p.bannerReplacement):(bannerObj&&bannerObj.queued&&bannerObj.bytes?projectBytesFromJson(bannerObj.bytes):null);
   if(bannerBytesFromProject){try{decodeBannerBytes(bannerBytesFromProject,true)}catch(e){log('Project banner preview load failed: '+e.message)}}
   const lm=p.launchMeReplacement||p.launchMeFile;
   if(lm&&lm.bytes){
     const e=findLaunchMeEntry(),key=e?launchMeKey(e):(lm.name||'LaunchMe');
     deleteLaunchMeReplacementKeys();
-    state.replacements.set(key,new Uint8Array(lm.bytes));
+    state.replacements.set(key,projectBytesFromJson(lm.bytes));
   }
   state.mapDeleted=new Set(p.mapDeleted||[]);
   state.mapDeletedByMap=new Map((p.mapDeletedByMap||[]).map(([k,a])=>[k,new Set(a)]));
   state.operaDeletes=new Set(p.operaDeletes||[]);
   state.operaRenames=new Map(p.operaRenames||[]);
-  state.operaNewFiles=new Map((p.operaNewFiles||[]).map(([n,a])=>[n,new Uint8Array(a)]));
+  state.operaNewFiles=new Map((p.operaNewFiles||[]).map(([n,a])=>[n,projectBytesFromJson(a)]));
   log(`Project loaded: ${state.replacements.size} root replacements, ${state.rezReplacements.size} REZ replacements, banner ${state.bannerReplacement?'modified':'stock'}, LaunchMe ${currentLaunchMeReplacement()?'custom':'stock'}${spriteMig.resources?`, migrated ${spriteMig.resources} sprite resource(s) / ${spriteMig.patches} patch(es) for clipped rendering`:''}.`);
   if(spriteMig.errors&&spriteMig.errors.length)log('Sprite migration warnings: '+spriteMig.errors.join(' | '));
   updateLaunchMeStatus();
   if(state.rezEntries.length){buildAssets();refreshAssets();renderAudioList();updateLaunchMeStatus();renderOperaFs()}
 }
 function switchTab(n){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===n));['assets','maps','music','sfx','banner','launchme','operafs','export'].forEach(x=>$('tab_'+x).classList.toggle('hidden',x!==n))}
-document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchTab(t.dataset.tab));$('isoInput').onchange=e=>loadIso(e.target.files).catch(er=>log('ISO load failed: '+er.message));$('wadInput').onchange=async e=>{const f=e.target.files[0];if(f){state.wad=parseWad(await fileBytes(f));state.wadMaps=state.wad.maps;populateMaps();log(`Loaded ${state.wad.embeddedOffset?'32X ROM embedded ':''}WAD ${f.name}: ${state.wad.lumps.length} lumps; maps=${state.wad.maps.map(m=>m.name).join(', ')||'none'}. Press Process WAD/IWAD to apply it.`)}};$('btnProcessWad').onclick=processWad;$('assetFilter').onchange=refreshAssets;$('assetSearch').oninput=refreshAssets;$('btnRefreshAssets').onclick=refreshAssets;$('btnAssetBatchMode').onclick=()=>{state.batchMode=!state.batchMode;refreshAssets()};$('btnRevertBatch').onclick=revertBatchSelection;$('btnClearBatch').onclick=clearBatchSelection;$('btnDownloadRaw').onclick=downloadSelectedRawAsset;$('btnRevertSelected').onclick=()=>revertAssetToStock(state.selectedAsset);$('btnDownloadPng').onclick=()=>{const a=state.selectedAsset;if(isAudioAsset(a)){playRootAudio(a.root,'assetAudioPlayer');return}const img=a&&decodeAsset(a);if(img)img.toBlob(b=>download(cleanName(a.name)+'.png',b),'image/png');else log('No PNG decoder for this asset yet')};$('assetReplaceInput').onchange=async e=>{const f=e.target.files[0];if(f){try{await replaceSelectedRezAssetFromFile(f)}catch(err){log('Asset replacement failed: '+err.message)}}};$('mapCanvas').onclick=selectLine;if($('btnBlazeFixAllMaps'))$('btnBlazeFixAllMaps').onclick=applyBlazeFixAllRezMaps;if($('btnAutoFixSpriteOffsets'))$('btnAutoFixSpriteOffsets').onclick=autoFixModifiedSpriteOffsets;if($('btnAuditRez'))$('btnAuditRez').onclick=()=>auditRezConversion(false);$('btnLoadMap').onclick=loadMap;$('btnDeleteLine').onclick=deleteLine;$('btnExportMapWad').onclick=exportEditedMapWad;$('btnRevertMapStock').onclick=()=>{try{revertLoadedMapToStock()}catch(e){log('Revert map failed: '+e.message)}};if($('btnRefreshMusicList'))$('btnRefreshMusicList').onclick=renderAudioList;if($('btnRefreshSfxList'))$('btnRefreshSfxList').onclick=renderAudioList;if($('musicListSearch'))$('musicListSearch').oninput=()=>renderAudioListKind('music','musicAudioList');if($('sfxListSearch'))$('sfxListSearch').oninput=()=>renderAudioListKind('sfx','sfxAudioList');if($('btnEncodeMusic'))$('btnEncodeMusic').onclick=()=>encodeMusic().catch(e=>log('Music encode failed: '+e.message));if($('btnEncodeSfx'))$('btnEncodeSfx').onclick=()=>encodeSfx().catch(e=>log('SFX encode failed: '+e.message));$('bannerInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const img=new Image();img.onload=()=>{const c=$('bannerCanvas'),x=c.getContext('2d');x.fillStyle='black';x.fillRect(0,0,320,240);const s=Math.max(320/img.width,240/img.height),w=img.width*s,h=img.height*s;x.drawImage(img,(320-w)/2,(240-h)/2,w,h);URL.revokeObjectURL(img.src)};img.src=URL.createObjectURL(f)};$('btnLoadIsoBanner').onclick=()=>loadBannerFromIso(true);$('btnExportBanner').onclick=()=>download('banner.banner',blob(bannerBytes()));$('btnQueueBanner').onclick=()=>{try{setBannerReplacement(bannerBytes())}catch(e){log('Banner queue failed: '+e.message)}};$('btnRevertBanner').onclick=revertBannerToStock;if($('launchMeInput'))$('launchMeInput').onchange=e=>{const f=e.target.files[0];if(f)replaceLaunchMeFromFile(f).catch(err=>log('LaunchMe replace failed: '+err.message))};if($('btnDownloadLaunchMe'))$('btnDownloadLaunchMe').onclick=downloadLaunchMeCurrent;if($('btnRevertLaunchMe'))$('btnRevertLaunchMe').onclick=revertLaunchMeReplacement;if($('btnOperaRoot'))$('btnOperaRoot').onclick=operaGoRoot;if($('btnOperaUp'))$('btnOperaUp').onclick=operaGoUp;if($('btnOperaRefresh'))$('btnOperaRefresh').onclick=renderOperaFs;if($('operaFsSearch'))$('operaFsSearch').oninput=renderOperaFs;if($('btnOperaDownload'))$('btnOperaDownload').onclick=operaDownloadSelected;if($('operaFsReplaceInput'))$('operaFsReplaceInput').onchange=e=>{const f=e.target.files[0];if(f)operaReplaceSelectedFile(f).catch(err=>log('OperaFS replace failed: '+err.message));e.target.value=''};if($('btnOperaRename'))$('btnOperaRename').onclick=operaRenameSelected;if($('btnOperaDelete'))$('btnOperaDelete').onclick=operaDeleteSelected;if($('btnOperaRevert'))$('btnOperaRevert').onclick=operaRevertSelected;if($('operaFsNewFileInput'))$('operaFsNewFileInput').onchange=e=>{const f=e.target.files[0];if(f)operaPrepareAddFile(f).catch(err=>log('OperaFS add file read failed: '+err.message))};if($('btnOperaAddFile'))$('btnOperaAddFile').onclick=operaAddPendingFile;$('btnSaveProject').onclick=saveProject;$('projectInput').onchange=e=>{const f=e.target.files[0];if(f)loadProject(f)};$('btnExportIso').onclick=exportIso;$('btnDownloadRez').onclick=()=>{const r=buildRezFile?buildRezFile():state.rez;if(r)download('REZFILE',blob(r))};initBanner();updateLaunchMeStatus();renderOperaFs();log('Ready.');
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchTab(t.dataset.tab));$('isoInput').onchange=e=>loadIso(e.target.files).catch(er=>log('ISO load failed: '+er.message));$('wadInput').onchange=async e=>{const f=e.target.files[0];if(f){state.wad=parseWad(await fileBytes(f));state.wadMaps=state.wad.maps;populateMaps();log(`Loaded ${state.wad.embeddedOffset?'32X ROM embedded ':''}WAD ${f.name}: ${state.wad.lumps.length} lumps; maps=${state.wad.maps.map(m=>m.name).join(', ')||'none'}. Press Process WAD/IWAD to apply it.`)}};$('btnProcessWad').onclick=processWad;if($('btnFreedoomIwad'))$('btnFreedoomIwad').onclick=()=>processFreedoomIwad().catch(e=>log('Freedoom IWAD import failed: '+e.message));$('assetFilter').onchange=refreshAssets;$('assetSearch').oninput=refreshAssets;$('btnRefreshAssets').onclick=refreshAssets;$('btnAssetBatchMode').onclick=()=>{state.batchMode=!state.batchMode;refreshAssets()};$('btnRevertBatch').onclick=revertBatchSelection;$('btnClearBatch').onclick=clearBatchSelection;$('btnDownloadRaw').onclick=downloadSelectedRawAsset;$('btnRevertSelected').onclick=()=>revertAssetToStock(state.selectedAsset);$('btnDownloadPng').onclick=downloadSelectedPngAsset;$('assetReplaceInput').onchange=async e=>{const f=e.target.files[0];if(f){try{await replaceSelectedRezAssetFromFile(f)}catch(err){log('Asset replacement failed: '+err.message)}}};$('mapCanvas').onclick=selectLine;if($('btnBlazeFixAllMaps'))$('btnBlazeFixAllMaps').onclick=applyBlazeFixAllRezMaps;if($('btnAutoFixSpriteOffsets'))$('btnAutoFixSpriteOffsets').onclick=autoFixModifiedSpriteOffsets;if($('btnAuditRez'))$('btnAuditRez').onclick=()=>auditRezConversion(false);$('btnLoadMap').onclick=loadMap;$('btnDeleteLine').onclick=deleteLine;$('btnExportMapWad').onclick=exportEditedMapWad;$('btnRevertMapStock').onclick=()=>{try{revertLoadedMapToStock()}catch(e){log('Revert map failed: '+e.message)}};if($('btnRefreshMusicList'))$('btnRefreshMusicList').onclick=renderAudioList;if($('btnRefreshSfxList'))$('btnRefreshSfxList').onclick=renderAudioList;if($('musicListSearch'))$('musicListSearch').oninput=()=>renderAudioListKind('music','musicAudioList');if($('sfxListSearch'))$('sfxListSearch').oninput=()=>renderAudioListKind('sfx','sfxAudioList');if($('btnEncodeMusic'))$('btnEncodeMusic').onclick=()=>encodeMusic().catch(e=>log('Music encode failed: '+e.message));if($('btnEncodeSfx'))$('btnEncodeSfx').onclick=()=>encodeSfx().catch(e=>log('SFX encode failed: '+e.message));$('bannerInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const img=new Image();img.onload=()=>{const c=$('bannerCanvas'),x=c.getContext('2d');x.fillStyle='black';x.fillRect(0,0,320,240);const s=Math.max(320/img.width,240/img.height),w=img.width*s,h=img.height*s;x.drawImage(img,(320-w)/2,(240-h)/2,w,h);URL.revokeObjectURL(img.src)};img.src=URL.createObjectURL(f)};$('btnLoadIsoBanner').onclick=()=>loadBannerFromIso(true);$('btnExportBanner').onclick=()=>download('banner.banner',blob(bannerBytes()));$('btnQueueBanner').onclick=()=>{try{setBannerReplacement(bannerBytes())}catch(e){log('Banner queue failed: '+e.message)}};$('btnRevertBanner').onclick=revertBannerToStock;if($('launchMeInput'))$('launchMeInput').onchange=e=>{const f=e.target.files[0];if(f)replaceLaunchMeFromFile(f).catch(err=>log('LaunchMe replace failed: '+err.message))};if($('btnDownloadLaunchMe'))$('btnDownloadLaunchMe').onclick=downloadLaunchMeCurrent;if($('btnRevertLaunchMe'))$('btnRevertLaunchMe').onclick=revertLaunchMeReplacement;if($('btnOperaRoot'))$('btnOperaRoot').onclick=operaGoRoot;if($('btnOperaUp'))$('btnOperaUp').onclick=operaGoUp;if($('btnOperaRefresh'))$('btnOperaRefresh').onclick=renderOperaFs;if($('operaFsSearch'))$('operaFsSearch').oninput=renderOperaFs;if($('btnOperaDownload'))$('btnOperaDownload').onclick=operaDownloadSelected;if($('operaFsReplaceInput'))$('operaFsReplaceInput').onchange=e=>{const f=e.target.files[0];if(f)operaReplaceSelectedFile(f).catch(err=>log('OperaFS replace failed: '+err.message));e.target.value=''};if($('btnOperaRename'))$('btnOperaRename').onclick=operaRenameSelected;if($('btnOperaDelete'))$('btnOperaDelete').onclick=operaDeleteSelected;if($('btnOperaRevert'))$('btnOperaRevert').onclick=operaRevertSelected;if($('operaFsNewFileInput'))$('operaFsNewFileInput').onchange=e=>{const f=e.target.files[0];if(f)operaPrepareAddFile(f).catch(err=>log('OperaFS add file read failed: '+err.message))};if($('btnOperaAddFile'))$('btnOperaAddFile').onclick=operaAddPendingFile;$('btnSaveProject').onclick=saveProject;$('projectInput').onchange=e=>{const f=e.target.files[0];if(f)loadProject(f)};if($('btnIsoDiffProject'))$('btnIsoDiffProject').onclick=()=>createIsoDiffProject();$('btnExportIso').onclick=exportIso;$('btnDownloadRez').onclick=()=>{const r=buildRezFile?buildRezFile():state.rez;if(r)download('REZFILE',blob(r))};initBanner();updateLaunchMeStatus();renderOperaFs();log('Ready.');
+
 </script>
 </body></html>
